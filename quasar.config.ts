@@ -13,6 +13,10 @@ export default defineConfig((/* ctx */) => {
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
     boot: [],
 
+    bin: {
+      linuxAndroidStudio: '/opt/android-studio/bin/studio.sh',
+    },
+
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#css
     css: ['app.scss'],
 
