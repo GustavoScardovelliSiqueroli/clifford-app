@@ -56,6 +56,9 @@
 
 <style scoped>
 .modern-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex: 1 1 0%;
   min-width: 0;
   border-radius: 16px;
