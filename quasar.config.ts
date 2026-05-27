@@ -11,7 +11,7 @@ export default defineConfig((/* ctx */) => {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-vite/boot-files
-    boot: [],
+    boot: ['database'],
 
     bin: {
       linuxAndroidStudio: '/opt/android-studio/bin/studio.sh',
@@ -63,7 +63,18 @@ export default defineConfig((/* ctx */) => {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      extendViteConf(viteConf) {
+        viteConf.server = viteConf.server || {};
+        viteConf.server.headers = {
+          ...viteConf.server.headers,
+          'Cross-Origin-Opener-Policy': 'same-origin',
+          'Cross-Origin-Embedder-Policy': 'require-corp',
+        };
+        // serve o wasm com mime type correto
+        viteConf.optimizeDeps = viteConf.optimizeDeps || {};
+        viteConf.optimizeDeps.exclude = [...(viteConf.optimizeDeps.exclude || []), 'sql.js'];
+        viteConf.assetsInclude = ['**/*.wasm'];
+      },
       // viteVuePluginOptions: {},
 
       vitePlugins: [
