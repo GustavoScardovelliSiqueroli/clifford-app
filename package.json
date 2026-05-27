@@ -25,6 +25,7 @@
     "vue-router": "^5.0.3"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.3.4",
     "@eslint/js": "^9.39.4",
     "@quasar/app-vite": "^2.5.1",
     "@types/node": "^22.19.11",

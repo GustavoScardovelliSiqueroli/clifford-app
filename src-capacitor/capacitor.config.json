@@ -1,5 +1,9 @@
 {
   "appId": "com.gsss.atelie.app",
   "appName": "Clifford Atelie",
-  "webDir": "www"
+  "webDir": "www",
+  "server": {
+    "url": "http://192.168.0.130:9500",
+    "cleartext": true
+  }
 }

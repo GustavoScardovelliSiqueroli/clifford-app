@@ -5,6 +5,7 @@
   "author": "Gustavo Scardovelli Siqueroli",
   "private": true,
   "dependencies": {
+    "@capacitor-community/sqlite": "^8.1.0",
     "@capacitor/android": "^8.0.0",
     "@capacitor/app": "^8.0.0",
     "@capacitor/cli": "^8.0.0",
