@@ -13,11 +13,15 @@ export const useClientesStore = defineStore('clientes', () => {
   }
 
   async function adicionar(dados: Omit<Cliente, 'id' | 'created_at'>) {
+    dados.nome = dados.nome.trim();
     await ClienteRepository.create(dados);
     await carregar();
   }
 
   async function atualizar(id: number, dados: Partial<Cliente>) {
+    if (dados.nome) {
+      dados.nome = dados.nome.trim();
+    }
     await ClienteRepository.update(id, dados);
     await carregar();
   }

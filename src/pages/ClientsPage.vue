@@ -129,8 +129,28 @@
             />
 
             <q-input
-              v-if="editando"
-              v-model="dataFormatada"
+              v-model="dataNascimentoFormatada"
+              label="Data de nascimento"
+              outlined
+              dense
+              readonly
+              hide-bottom-space
+            >
+              <template v-slot:prepend>
+                <q-icon name="event" />
+              </template>
+
+              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                <q-date v-model="form.birth_date" mask="YYYY-MM-DD">
+                  <div class="row items-center justify-end">
+                    <q-btn v-close-popup label="OK" color="primary" flat />
+                  </div>
+                </q-date>
+              </q-popup-proxy>
+            </q-input>
+
+            <q-input
+              v-model="dataRegistroFormatada"
               label="Data de registro"
               outlined
               dense
@@ -196,12 +216,6 @@ import { useClientesStore } from 'src/stores/cliente-store';
 import type { Cliente } from 'src/database/repositories/cliente-repository';
 import { date } from 'quasar';
 
-const dataFormatada = computed(() => {
-  if (!form.value.created_at) return '';
-
-  return date.formatDate(form.value.created_at, 'DD/MM/YYYY [às] HH:mm');
-});
-
 const store = useClientesStore();
 
 // Search
@@ -219,12 +233,25 @@ const dialog = ref(false);
 const editando = ref(false);
 const salvando = ref(false);
 const clienteSelecionado = ref<Cliente | null>(null);
-const form = ref({ nome: '', telefone: '', created_at: '' });
+const form = ref({ nome: '', telefone: '', birth_date: '', created_at: '' });
 const erros = ref({ nome: '' });
+
+const dataRegistroFormatada = computed(() => {
+  return formatCustomDate(form.value.created_at);
+});
+const dataNascimentoFormatada = computed(() => {
+  return formatCustomDate(form.value.birth_date);
+});
+
+function formatCustomDate(dateStr: string | null | undefined) {
+  if (!dateStr) return '';
+
+  return date.formatDate(dateStr, 'DD/MM/YYYY');
+}
 
 function abrirDialogNovo() {
   editando.value = false;
-  form.value = { nome: '', telefone: '', created_at: '' };
+  form.value = { nome: '', telefone: '', birth_date: '', created_at: '' };
   erros.value = { nome: '' };
   dialog.value = true;
 }
@@ -235,6 +262,7 @@ function abrirDialogEditar(cliente: Cliente) {
   form.value = {
     nome: cliente.nome,
     telefone: cliente.telefone ?? '',
+    birth_date: cliente.birth_date ?? '',
     created_at: cliente.created_at ?? '',
   };
   erros.value = { nome: '' };
@@ -254,6 +282,18 @@ async function salvar() {
       await store.adicionar(form.value);
     }
     dialog.value = false;
+  } catch (error) {
+    if (error instanceof Error) {
+      if (
+        error?.message?.includes('UNIQUE constraint failed') ||
+        error?.message?.includes('unique')
+      ) {
+        erros.value.nome = 'Já existe um cliente com esse nome';
+        return;
+      }
+    }
+
+    erros.value.nome = 'Erro ao salvar cliente';
   } finally {
     salvando.value = false;
   }
