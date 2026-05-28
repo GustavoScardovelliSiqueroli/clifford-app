@@ -1,11 +1,11 @@
 <template>
   <q-page class="clients-page">
     <!-- Header -->
-    <div class="page-header q-px-lg q-pt-lg q-pb-md">
+    <div class="page-header q-px-lg q-pt-lg q-pb-md bg-primary">
       <div class="row items-center justify-between">
         <div>
           <div class="page-title">Clientes</div>
-          <div class="page-subtitle">{{ store.clientes.length }} cadastrados</div>
+          <div class="page-subtitle text-grey-8">{{ store.clientes.length }} cadastrados</div>
         </div>
         <q-btn round unelevated icon="add" class="btn-add" @click="abrirDialogNovo" />
       </div>
