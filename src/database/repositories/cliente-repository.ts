@@ -31,9 +31,10 @@ export const ClienteRepository = {
 
   async update(id: number, cliente: Partial<Cliente>): Promise<void> {
     const db = await getDB();
-    await db.run('UPDATE clientes SET nome = ?, telefone = ? WHERE id = ?', [
+    await db.run('UPDATE clientes SET nome = ?, telefone = ?, created_at = ? WHERE id = ?', [
       cliente.nome,
       cliente.telefone ?? null,
+      cliente.created_at,
       id,
     ]);
     await saveDB();

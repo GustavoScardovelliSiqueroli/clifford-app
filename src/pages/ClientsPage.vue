@@ -105,25 +105,51 @@
           </div>
         </q-card-section>
 
-        <q-card-section class="q-pt-none q-px-lg q-pb-md">
-          <q-input
-            v-model="form.nome"
-            label="Nome *"
-            outlined
-            dense
-            class="q-mb-sm"
-            :error="!!erros.nome"
-            :error-message="erros.nome"
-            @update:model-value="erros.nome = ''"
-          />
-          <q-input
-            v-model="form.telefone"
-            label="Telefone"
-            outlined
-            dense
-            mask="(##) #####-####"
-            unmasked-value
-          />
+        <q-card-section class="q-px-lg q-pb-md">
+          <div class="column q-gutter-md">
+            <q-input
+              v-model="form.nome"
+              label="Nome *"
+              outlined
+              dense
+              hide-bottom-space
+              :error="!!erros.nome"
+              :error-message="erros.nome"
+              @update:model-value="erros.nome = ''"
+            />
+
+            <q-input
+              v-model="form.telefone"
+              label="Telefone"
+              outlined
+              dense
+              mask="(##) #####-####"
+              unmasked-value
+              hide-bottom-space
+            />
+
+            <q-input
+              v-if="editando"
+              v-model="dataFormatada"
+              label="Data de registro"
+              outlined
+              dense
+              readonly
+              hide-bottom-space
+            >
+              <template v-slot:prepend>
+                <q-icon name="event" />
+              </template>
+
+              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+                <q-date v-model="form.created_at" mask="YYYY-MM-DD">
+                  <div class="row items-center justify-end">
+                    <q-btn v-close-popup label="OK" color="primary" flat />
+                  </div>
+                </q-date>
+              </q-popup-proxy>
+            </q-input>
+          </div>
         </q-card-section>
 
         <q-card-actions align="right" class="q-px-lg q-pb-lg">
@@ -168,6 +194,13 @@
 import { ref, computed, onMounted } from 'vue';
 import { useClientesStore } from 'src/stores/cliente-store';
 import type { Cliente } from 'src/database/repositories/cliente-repository';
+import { date } from 'quasar';
+
+const dataFormatada = computed(() => {
+  if (!form.value.created_at) return '';
+
+  return date.formatDate(form.value.created_at, 'DD/MM/YYYY [às] HH:mm');
+});
 
 const store = useClientesStore();
 
@@ -186,12 +219,12 @@ const dialog = ref(false);
 const editando = ref(false);
 const salvando = ref(false);
 const clienteSelecionado = ref<Cliente | null>(null);
-const form = ref({ nome: '', telefone: '' });
+const form = ref({ nome: '', telefone: '', created_at: '' });
 const erros = ref({ nome: '' });
 
 function abrirDialogNovo() {
   editando.value = false;
-  form.value = { nome: '', telefone: '' };
+  form.value = { nome: '', telefone: '', created_at: '' };
   erros.value = { nome: '' };
   dialog.value = true;
 }
@@ -199,7 +232,11 @@ function abrirDialogNovo() {
 function abrirDialogEditar(cliente: Cliente) {
   editando.value = true;
   clienteSelecionado.value = cliente;
-  form.value = { nome: cliente.nome, telefone: cliente.telefone ?? '' };
+  form.value = {
+    nome: cliente.nome,
+    telefone: cliente.telefone ?? '',
+    created_at: cliente.created_at ?? '',
+  };
   erros.value = { nome: '' };
   dialog.value = true;
 }
