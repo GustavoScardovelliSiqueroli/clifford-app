@@ -21,13 +21,17 @@ export const ClienteRepository = {
     return result.values?.[0] ?? null;
   },
 
-  async create(cliente: Omit<Cliente, 'id' | 'created_at'>): Promise<void> {
+  async create(cliente: Omit<Cliente, 'id'>): Promise<void> {
     const db = await getDB();
-    await db.run('INSERT INTO clientes (nome, telefone, birth_date) VALUES (?, ?, ?)', [
-      cliente.nome,
-      cliente.telefone ?? null,
-      cliente.birth_date ?? null,
-    ]);
+    await db.run(
+      'INSERT INTO clientes (nome, telefone, birth_date, created_at) VALUES (?, ?, ?, ?)',
+      [
+        cliente.nome,
+        cliente.telefone ?? null,
+        cliente.birth_date ?? null,
+        cliente.created_at ?? null,
+      ],
+    );
     await saveDB();
   },
 
