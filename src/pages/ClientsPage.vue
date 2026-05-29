@@ -63,7 +63,16 @@
 
             <!-- Info -->
             <div class="col q-ml-md">
-              <div class="client-name">{{ cliente.nome }}</div>
+              <div class="client-name row items-center q-gutter-xs">
+                {{ cliente.nome }}
+                <q-badge
+                  v-if="!cliente.ativo"
+                  color="grey-4"
+                  text-color="grey-7"
+                  label="Inativo"
+                  class="text-caption"
+                />
+              </div>
               <div class="client-phone">
                 <q-icon name="phone" size="12px" class="q-mr-xs" />
                 {{ cliente.telefone || 'Sem telefone' }}
@@ -179,6 +188,14 @@
               hide-bottom-space
               input-style="min-height: 80px"
             />
+
+            <div class="row items-center justify-between q-mt-xs">
+              <div>
+                <div class="text-body2 text-grey-8">Cliente ativo</div>
+                <div class="text-caption text-grey-5">Desative para não gerar cobrança</div>
+              </div>
+              <q-toggle v-model="form.ativo" color="primary" keep-color />
+            </div>
           </div>
         </q-card-section>
 
@@ -243,7 +260,14 @@ const dialog = ref(false);
 const editando = ref(false);
 const salvando = ref(false);
 const clienteSelecionado = ref<Cliente | null>(null);
-const form = ref({ nome: '', telefone: '', birth_date: '', created_at: '', obs: '' });
+const form = ref({
+  nome: '',
+  telefone: '',
+  birth_date: '',
+  created_at: date.formatDate(new Date(), 'YYYY-MM-DD'),
+  obs: '',
+  ativo: true,
+});
 const erros = ref({ nome: '' });
 
 const dataRegistroFormatada = computed(() => {
@@ -256,12 +280,21 @@ const dataNascimentoFormatada = computed(() => {
 function formatCustomDate(dateStr: string | null | undefined) {
   if (!dateStr) return '';
 
-  return date.formatDate(dateStr, 'DD/MM/YYYY');
+  const [year, month, day] = dateStr.split('-');
+
+  return `${day}/${month}/${year}`;
 }
 
 function abrirDialogNovo() {
   editando.value = false;
-  form.value = { nome: '', telefone: '', birth_date: '', created_at: '', obs: '' };
+  form.value = {
+    nome: '',
+    telefone: '',
+    birth_date: '',
+    created_at: date.formatDate(new Date(), 'YYYY-MM-DD'),
+    obs: '',
+    ativo: true,
+  };
   erros.value = { nome: '' };
   dialog.value = true;
 }
@@ -275,6 +308,7 @@ function abrirDialogEditar(cliente: Cliente) {
     birth_date: cliente.birth_date ?? '',
     created_at: cliente.created_at ?? '',
     obs: cliente.obs ?? '',
+    ativo: cliente.ativo === 1,
   };
   erros.value = { nome: '' };
   dialog.value = true;
@@ -287,10 +321,12 @@ async function salvar() {
   }
   salvando.value = true;
   try {
+    const payload = { ...form.value, ativo: form.value.ativo ? 1 : 0 };
+
     if (editando.value && clienteSelecionado.value?.id) {
-      await store.atualizar(clienteSelecionado.value.id, form.value);
+      await store.atualizar(clienteSelecionado.value.id, payload);
     } else {
-      await store.adicionar(form.value);
+      await store.adicionar(payload);
     }
     dialog.value = false;
   } catch (error) {

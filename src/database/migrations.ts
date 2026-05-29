@@ -10,7 +10,8 @@ export async function runMigrations(): Promise<void> {
       telefone   TEXT,
       birth_date TEXT,
       obs        TEXT,
-      created_at TEXT DEFAULT CURRENT_TIMESTAMP
+      ativo      INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT DEFAULT CURRENT_DATE
     );
 
   `);
