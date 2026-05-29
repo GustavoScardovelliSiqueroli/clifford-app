@@ -169,6 +169,16 @@
                 </q-date>
               </q-popup-proxy>
             </q-input>
+
+            <q-input
+              v-model="form.obs"
+              label="Observações"
+              outlined
+              type="textarea"
+              autogrow
+              hide-bottom-space
+              input-style="min-height: 80px"
+            />
           </div>
         </q-card-section>
 
@@ -233,7 +243,7 @@ const dialog = ref(false);
 const editando = ref(false);
 const salvando = ref(false);
 const clienteSelecionado = ref<Cliente | null>(null);
-const form = ref({ nome: '', telefone: '', birth_date: '', created_at: '' });
+const form = ref({ nome: '', telefone: '', birth_date: '', created_at: '', obs: '' });
 const erros = ref({ nome: '' });
 
 const dataRegistroFormatada = computed(() => {
@@ -251,7 +261,7 @@ function formatCustomDate(dateStr: string | null | undefined) {
 
 function abrirDialogNovo() {
   editando.value = false;
-  form.value = { nome: '', telefone: '', birth_date: '', created_at: '' };
+  form.value = { nome: '', telefone: '', birth_date: '', created_at: '', obs: '' };
   erros.value = { nome: '' };
   dialog.value = true;
 }
@@ -264,6 +274,7 @@ function abrirDialogEditar(cliente: Cliente) {
     telefone: cliente.telefone ?? '',
     birth_date: cliente.birth_date ?? '',
     created_at: cliente.created_at ?? '',
+    obs: cliente.obs ?? '',
   };
   erros.value = { nome: '' };
   dialog.value = true;

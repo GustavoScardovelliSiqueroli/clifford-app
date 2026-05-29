@@ -5,6 +5,7 @@ export interface Cliente {
   nome: string;
   telefone?: string;
   birth_date?: string;
+  obs: string;
   created_at?: string;
 }
 
@@ -24,12 +25,13 @@ export const ClienteRepository = {
   async create(cliente: Omit<Cliente, 'id'>): Promise<void> {
     const db = await getDB();
     await db.run(
-      'INSERT INTO clientes (nome, telefone, birth_date, created_at) VALUES (?, ?, ?, ?)',
+      'INSERT INTO clientes (nome, telefone, birth_date, created_at, obs) VALUES (?, ?, ?, ?, ?)',
       [
         cliente.nome,
         cliente.telefone ?? null,
         cliente.birth_date ?? null,
         cliente.created_at ?? null,
+        cliente.obs ?? null,
       ],
     );
     await saveDB();
