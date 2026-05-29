@@ -1,7 +1,6 @@
-
 # Descrição do Projeto
 
-Estou desenvolvendo um aplicativo Android local-first para gerenciamento financeiro de um ateliê de pintura.
+Um aplicativo Android local-first para gerenciamento financeiro de um ateliê de pintura.
 
 O sistema será utilizado por apenas um usuário: o proprietário do ateliê, um homem de aproximadamente 60 anos com pouca familiaridade com tecnologia. Por isso, o aplicativo deve priorizar simplicidade extrema, clareza visual e facilidade de uso.
 
