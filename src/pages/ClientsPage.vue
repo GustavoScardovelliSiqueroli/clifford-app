@@ -390,19 +390,6 @@ onMounted(() => void store.carregar());
   border-bottom: 1px solid #ebebeb;
 }
 
-.page-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1a1a1a;
-  letter-spacing: -0.3px;
-}
-
-.page-subtitle {
-  font-size: 13px;
-  color: #888;
-  margin-top: 1px;
-}
-
 .btn-add {
   background: #1a1a1a !important;
   color: #fff !important;
