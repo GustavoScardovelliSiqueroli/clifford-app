@@ -22,5 +22,34 @@ export async function runMigrations(): Promise<void> {
     );
   `);
 
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS mensalidade_config (
+      id             INTEGER PRIMARY KEY AUTOINCREMENT,
+      cliente_id     INTEGER NOT NULL REFERENCES clientes(id),
+      valor          REAL,
+      dia_vencimento INTEGER
+    );
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS cobrancas (
+      id                INTEGER PRIMARY KEY AUTOINCREMENT,
+      cliente_id        INTEGER NOT NULL REFERENCES clientes(id),
+      valor_mensalidade REAL    NOT NULL,
+      vencimento        TEXT    NOT NULL,
+      data_pagamento    TEXT,
+      competencia       TEXT    NOT NULL
+    );
+  `);
+
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS cobrancas_extras (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      id_cobranca INTEGER NOT NULL REFERENCES cobrancas(id),
+      motivo      TEXT    NOT NULL,
+      valor       REAL    NOT NULL
+    );
+  `);
+
   console.log('Migrations executadas');
 }
