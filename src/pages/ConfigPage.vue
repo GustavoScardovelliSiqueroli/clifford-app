@@ -102,12 +102,16 @@
         @click="salvar"
       />
     </div>
+
+    <q-btn color="negative" label="RESET DB" @click="resetDb"></q-btn>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
 import { useConfigStore } from 'src/stores/config-store';
+import { getDB, saveDB } from 'src/database/connection';
+import { runMigrations } from 'src/database/migrations';
 
 const store = useConfigStore();
 
@@ -165,6 +169,24 @@ watch(
     }
   },
 );
+
+async function resetDb() {
+  const db = await getDB();
+
+  await db.execute('PRAGMA foreign_keys = OFF');
+
+  await db.execute('DROP TABLE IF EXISTS cobrancas_extras');
+  await db.execute('DROP TABLE IF EXISTS cobrancas');
+  await db.execute('DROP TABLE IF EXISTS mensalidade_config');
+  await db.execute('DROP TABLE IF EXISTS ajustes');
+  await db.execute('DROP TABLE IF EXISTS clientes');
+
+  await db.execute('PRAGMA foreign_keys = ON');
+
+  await saveDB();
+  await runMigrations();
+  await saveDB();
+}
 </script>
 
 <style scoped lang="scss">

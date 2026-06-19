@@ -12,6 +12,11 @@ import { runMigrations } from 'src/database/migrations';
 async function resetDb() {
   const db = await getDB();
   await db.execute('DROP TABLE clientes');
+  await db.execute('DROP TABLE ajustes');
+  await db.execute('DROP TABLE mensalidade_config');
+  await db.execute('DROP TABLE cobrancas');
+  await db.execute('DROP TABLE cobrancas_extras');
+
   await saveDB();
   await runMigrations();
   await saveDB();

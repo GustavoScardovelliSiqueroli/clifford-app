@@ -47,7 +47,8 @@ export async function runMigrations(): Promise<void> {
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
       id_cobranca INTEGER NOT NULL REFERENCES cobrancas(id),
       motivo      TEXT    NOT NULL,
-      valor       REAL    NOT NULL
+      valor       REAL    NOT NULL,
+      created_at  TEXT    DEFAULT CURRENT_TIMESTAMP
     );
   `);
 
