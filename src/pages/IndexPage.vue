@@ -7,8 +7,8 @@
         <q-btn round flat dense icon="keyboard_arrow_right" @click="competenciaProxima" />
       </div>
 
-      <div class="row q-gutter-sm q-mb-md">
-        <q-col sm="6" md="3">
+      <div class="row q-col-gutter-sm q-mb-md">
+        <div class="col-12 col-sm-6 col-md-3">
           <q-card class="text-center bg-primary text-white">
             <div class="q-pa-md">
               <div class="text-subtitle1">Pendentes</div>
@@ -16,9 +16,9 @@
               <div class="text-subtitle1">{{ formatCurrency(pendentesTotal) }}</div>
             </div>
           </q-card>
-        </q-col>
+        </div>
 
-        <q-col sm="6" md="3">
+        <div class="col-12 col-sm-6 col-md-3">
           <q-card class="text-center bg-positive text-white">
             <div class="q-pa-md">
               <div class="text-subtitle1">Pagos</div>
@@ -26,12 +26,12 @@
               <div class="text-subtitle1">{{ formatCurrency(pagosTotal) }}</div>
             </div>
           </q-card>
-        </q-col>
+        </div>
       </div>
     </div>
 
     <div v-if="loading" class="q-mx-auto">
-      <q-spinner dots size="48px" color="primary" />
+      <q-spinner-dots size="48px" color="primary" />
     </div>
 
     <div v-else>
@@ -46,14 +46,12 @@
           v-for="cobranca in cobrancasFiltradas"
           :key="cobranca.id as number"
           class="q-py-sm"
+          clickable
           @click="abrirModal({ id: cobranca.id, nome: cobranca.nome })"
-          style="cursor: pointer"
         >
           <q-item-section avatar>
             <q-avatar>
-              <q-icon color="white" :class="cobranca.statusColor">
-                {{ cobranca.statusIcon }}
-              </q-icon>
+              <q-icon :color="cobranca.statusColor" :name="cobranca.statusIcon"> </q-icon>
             </q-avatar>
           </q-item-section>
 
