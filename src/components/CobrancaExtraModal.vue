@@ -1,5 +1,5 @@
 <template>
-  <q-dialog v-model="dialog" persistent>
+  <q-dialog v-model="dialog" persistent class="dialog-no-overflow">
     <q-card class="form-card">
       <!-- Header -->
       <q-card-section class="dialog-header">
@@ -211,5 +211,9 @@ watch(
   font-size: 17px;
   font-weight: 700;
   color: #1a1a1a;
+}
+
+:deep(.dialog-no-overflow .q-dialog__inner) {
+  border-radius: 20px;
 }
 </style>

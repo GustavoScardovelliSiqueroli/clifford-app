@@ -106,15 +106,15 @@
     </q-list>
 
     <!-- Dialog novo/editar -->
-    <q-dialog v-model="dialog" persistent>
-      <q-card class="form-card">
-        <q-card-section class="dialog-header">
+    <q-dialog v-model="dialog" persistent class="dialog-no-overflow">
+      <q-card class="form-card column full-width-mobile">
+        <q-card-section class="q-px-md q-px-lg@sm dialog-header">
           <div class="dialog-title">
             {{ editando ? 'Editar cliente' : 'Novo cliente' }}
           </div>
         </q-card-section>
 
-        <q-card-section class="q-px-lg q-pb-md">
+        <q-card-section class="q-px-md q-px-lg@sm q-pb-md dialog-content">
           <div class="column q-gutter-md">
             <q-input
               v-model="form.nome"
@@ -189,6 +189,53 @@
               input-style="min-height: 80px"
             />
 
+            <!-- Mensalidade Config -->
+            <q-separator class="q-my-md" />
+            <div class="text-subtitle2 text-grey-8 q-mb-sm">Configuração de Mensalidade (opcional)</div>
+            <div class="text-caption text-grey-6 q-mb-md">Deixe em branco para usar os valores globais</div>
+
+            <q-input
+              v-model="form.mensalidade_valor"
+              label="Valor da mensalidade (R$)"
+              placeholder="Ex: 150.00"
+              outlined
+              dense
+              hide-bottom-space
+              prefix="R$ "
+              type="text"
+              @update:model-value="erros.mensalidade_valor = ''"
+              :error="!!erros.mensalidade_valor"
+              :error-message="erros.mensalidade_valor"
+              :rules="[
+                (val) => val == null || val === '' || (Number(val) > 0) || 'Valor deve ser maior que zero',
+              ]"
+            >
+              <template #append>
+                <q-icon name="currency_real" size="16px" color="grey-5" />
+              </template>
+            </q-input>
+
+            <q-input
+              v-model="form.mensalidade_dia_vencimento"
+              label="Dia de vencimento"
+              placeholder="Ex: 5"
+              outlined
+              dense
+              hide-bottom-space
+              type="text"
+              @update:model-value="erros.mensalidade_dia_vencimento = ''"
+              :error="!!erros.mensalidade_dia_vencimento"
+              :error-message="erros.mensalidade_dia_vencimento"
+              :rules="[
+                (val) => val == null || val === '' || Number.isInteger(Number(val)) || 'Informe um dia inteiro',
+                (val) => val == null || val === '' || (Number(val) >= 1 && Number(val) <= 31) || 'Dia deve estar entre 1 e 31',
+              ]"
+            >
+              <template #append>
+                <q-icon name="event" size="16px" color="grey-5" />
+              </template>
+            </q-input>
+
             <div class="row items-center justify-between q-mt-xs">
               <div>
                 <div class="text-body2 text-grey-8">Cliente ativo</div>
@@ -199,7 +246,7 @@
           </div>
         </q-card-section>
 
-        <q-card-actions align="right" class="q-px-lg q-pb-lg">
+        <q-card-actions align="right" class="q-px-md q-px-lg@sm q-pb-lg dialog-actions">
           <q-btn flat label="Cancelar" color="grey-6" v-close-popup />
           <q-btn
             unelevated
@@ -213,14 +260,13 @@
     </q-dialog>
 
     <!-- Dialog confirmar exclusão -->
-    <q-dialog v-model="dialogExclusao">
-      <q-card class="form-card">
-        <q-card-section class="dialog-header">
-          <div class="dialog-title">Excluir cliente</div>
-        </q-card-section>
-        <q-card-section class="q-px-lg">
-          Tem certeza que deseja excluir <strong>{{ clienteSelecionado?.nome }}</strong
-          >?
+    <q-dialog v-model="dialogExclusao" persistent>
+      <q-card class="delete-confirm-card">
+        <q-card-section class="q-px-lg q-pt-lg q-pb-md">
+          <div class="text-h6 q-mb-md">Excluir cliente</div>
+          <div class="text-body1">
+            Tem certeza que deseja excluir <strong>{{ clienteSelecionado?.nome }}</strong>?
+          </div>
         </q-card-section>
         <q-card-actions align="right" class="q-px-lg q-pb-lg">
           <q-btn flat label="Cancelar" color="grey-6" v-close-popup />
@@ -267,8 +313,10 @@ const form = ref({
   created_at: date.formatDate(new Date(), 'YYYY-MM-DD'),
   obs: '',
   ativo: true,
+  mensalidade_valor: '',
+  mensalidade_dia_vencimento: '',
 });
-const erros = ref({ nome: '' });
+const erros = ref({ nome: '', mensalidade_valor: '', mensalidade_dia_vencimento: '' });
 
 const dataRegistroFormatada = computed(() => {
   return formatCustomDate(form.value.created_at);
@@ -294,8 +342,10 @@ function abrirDialogNovo() {
     created_at: date.formatDate(new Date(), 'YYYY-MM-DD'),
     obs: '',
     ativo: true,
+    mensalidade_valor: '',
+    mensalidade_dia_vencimento: '',
   };
-  erros.value = { nome: '' };
+  erros.value = { nome: '', mensalidade_valor: '', mensalidade_dia_vencimento: '' };
   dialog.value = true;
 }
 
@@ -309,8 +359,10 @@ function abrirDialogEditar(cliente: Cliente) {
     created_at: cliente.created_at ?? '',
     obs: cliente.obs ?? '',
     ativo: cliente.ativo === 1,
+    mensalidade_valor: cliente.mensalidade_config?.valor != null ? String(cliente.mensalidade_config.valor) : '',
+    mensalidade_dia_vencimento: cliente.mensalidade_config?.dia_vencimento != null ? String(cliente.mensalidade_config.dia_vencimento) : '',
   };
-  erros.value = { nome: '' };
+  erros.value = { nome: '', mensalidade_valor: '', mensalidade_dia_vencimento: '' };
   dialog.value = true;
 }
 
@@ -319,9 +371,42 @@ async function salvar() {
     erros.value.nome = 'Nome é obrigatório';
     return;
   }
+
+  // Validate mensalidade config
+  if (form.value.mensalidade_valor !== '') {
+    const valor = Number(form.value.mensalidade_valor);
+    if (isNaN(valor) || valor <= 0) {
+      erros.value.mensalidade_valor = 'Valor inválido';
+      return;
+    }
+  }
+  if (form.value.mensalidade_dia_vencimento !== '') {
+    const dia = Number(form.value.mensalidade_dia_vencimento);
+    if (isNaN(dia) || dia < 1 || dia > 31) {
+      erros.value.mensalidade_dia_vencimento = 'Dia deve estar entre 1 e 31';
+      return;
+    }
+  }
+
   salvando.value = true;
   try {
-    const payload = { ...form.value, ativo: form.value.ativo ? 1 : 0 };
+    const payload: Omit<Cliente, 'id'> = {
+      nome: form.value.nome.trim(),
+      telefone: form.value.telefone || '',
+      birth_date: form.value.birth_date || '',
+      obs: form.value.obs || '',
+      ativo: form.value.ativo ? 1 : 0,
+      created_at: form.value.created_at || '',
+    };
+
+    // Add mensalidade_config if any value provided
+    if (form.value.mensalidade_valor !== '' || form.value.mensalidade_dia_vencimento !== '') {
+      payload.mensalidade_config = {
+        cliente_id: 0, // Will be set by repository
+        valor: form.value.mensalidade_valor !== '' ? Number(form.value.mensalidade_valor) : undefined,
+        dia_vencimento: form.value.mensalidade_dia_vencimento !== '' ? Number(form.value.mensalidade_dia_vencimento) : undefined,
+      };
+    }
 
     if (editando.value && clienteSelecionado.value?.id) {
       await store.atualizar(clienteSelecionado.value.id, payload);
@@ -330,6 +415,7 @@ async function salvar() {
     }
     dialog.value = false;
   } catch (error) {
+    console.error('Erro ao salvar cliente:', error);
     if (error instanceof Error) {
       if (
         error?.message?.includes('UNIQUE constraint failed') ||
@@ -476,17 +562,85 @@ onMounted(() => void store.carregar());
   max-width: 400px;
   border-radius: 20px !important;
   overflow: hidden;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+.full-width-mobile {
+  @media (max-width: 599px) {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0 !important;
+    height: 100%;
+    max-height: 100%;
+  }
 }
 
 .dialog-header {
   padding: 20px 24px 16px;
   border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.dialog-content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-bottom: 8px;
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+.dialog-content :deep(.q-field) {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.dialog-content .column {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.dialog-actions {
+  flex-shrink: 0;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
+  margin-top: auto;
 }
 
 .dialog-title {
   font-size: 17px;
   font-weight: 700;
   color: #1a1a1a;
+}
+
+.delete-confirm-card {
+  min-width: 280px;
+  max-width: 90vw;
+  border-radius: 16px !important;
+}
+
+:deep(.dialog-no-overflow .q-dialog__inner) {
+  overflow-x: hidden;
+  max-width: 100vw;
+  border-radius: 20px;
+}
+
+:deep(.delete-confirm-card + .q-dialog__inner) {
+  border-radius: 16px;
+}
+
+:deep(.full-width-mobile .q-dialog__inner) {
+  @media (max-width: 599px) {
+    max-width: 100vw;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+  }
 }
 
 // List transition

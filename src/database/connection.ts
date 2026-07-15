@@ -20,6 +20,7 @@ export async function getDB(): Promise<SQLiteDBConnection> {
   }
 
   await db.open();
+  await db.execute('PRAGMA foreign_keys = ON');
   return db;
 }
 
