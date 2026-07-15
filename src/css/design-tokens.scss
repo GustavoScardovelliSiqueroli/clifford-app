@@ -1,0 +1,433 @@
+// Design Tokens - Clifford App
+// ============================================================
+// Centralized design tokens for consistent styling across the app
+// ============================================================
+
+// ============================================================
+// COLORS
+// ============================================================
+
+// Primary Brand Colors
+$color-primary: #fbac25;
+$color-primary-dark: #e0971f;
+$color-primary-light: #ffc94c;
+$color-primary-contrast: #1a1a1a;
+
+// Semantic Colors
+$color-success: #21ba45;
+$color-success-dark: #1c9d38;
+$color-success-light: #4cd967;
+
+$color-warning: #f2c037;
+$color-warning-dark: #d4a82e;
+$color-warning-light: #f5d160;
+
+$color-error: #c10015;
+$color-error-dark: #a00012;
+$color-error-light: #e04030;
+
+$color-info: #31ccec;
+$color-info-dark: #28b0cd;
+$color-info-light: #5dd0f0;
+
+// Neutral Colors
+$color-white: #ffffff;
+$color-black: #000000;
+
+$color-neutral-50: #fafafa;
+$color-neutral-100: #f5f5f5;
+$color-neutral-200: #eeeeee;
+$color-neutral-300: #e0e0e0;
+$color-neutral-400: #bdbdbd;
+$color-neutral-500: #9e9e9e;
+$color-neutral-600: #757575;
+$color-neutral-700: #616161;
+$color-neutral-800: #424242;
+$color-neutral-900: #212121;
+$color-neutral-950: #1a1a1a;
+
+// Background Colors
+$color-bg-primary: #f5f5f7;
+$color-bg-secondary: #ffffff;
+$color-bg-tertiary: #f0f0f0;
+$color-bg-inverse: #1a1a1a;
+
+// Surface Colors
+$color-surface-primary: #ffffff;
+$color-surface-secondary: #fafafa;
+$color-surface-hover: #f0f0f0;
+$color-surface-active: #e8e8e8;
+$color-surface-border: #ebebeb;
+
+// Text Colors
+$color-text-primary: #1a1a1a;
+$color-text-secondary: #616161;
+$color-text-tertiary: #9e9e9e;
+$color-text-inverse: #ffffff;
+$color-text-disabled: #bdbdbd;
+$color-text-link: #fbac25;
+
+// Border Colors
+$color-border-light: #ebebeb;
+$color-border-medium: #e0e0e0;
+$color-border-focus: #fbac25;
+
+// Status Colors with backgrounds
+$color-status-pending-bg: #fff3cd;
+$color-status-pending-text: #856404;
+$color-status-pending-border: #ffeeba;
+
+$color-status-paid-bg: #d4edda;
+$color-status-paid-text: #155724;
+$color-status-paid-border: #c3e6cb;
+
+$color-status-overdue-bg: #f8d7da;
+$color-status-overdue-text: #721c24;
+$color-status-overdue-border: #f5c6cb;
+
+
+// ============================================================
+// SPACING
+// ============================================================
+
+$spacing-0: 0;
+$spacing-1: 4px;
+$spacing-2: 8px;
+$spacing-3: 12px;
+$spacing-4: 16px;
+$spacing-5: 20px;
+$spacing-6: 24px;
+$spacing-7: 28px;
+$spacing-8: 32px;
+$spacing-10: 40px;
+$spacing-12: 48px;
+$spacing-16: 64px;
+
+// Semantic spacing
+$spacing-xs: $spacing-1;
+$spacing-sm: $spacing-2;
+$spacing-md: $spacing-3;
+$spacing-lg: $spacing-4;
+$spacing-xl: $spacing-6;
+$spacing-2xl: $spacing-8;
+$spacing-3xl: $spacing-10;
+
+$spacing-page-padding: $spacing-4;      // 16px
+$spacing-page-padding-lg: $spacing-6;   // 24px
+$spacing-section-gap: $spacing-6;       // 24px
+$spacing-card-padding: $spacing-4;      // 16px
+$spacing-card-gap: $spacing-3;          // 12px
+
+
+// ============================================================
+// TYPOGRAPHY
+// ============================================================
+
+// Font Families
+$font-family-base: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+$font-family-mono: 'Roboto Mono', 'SF Mono', monospace;
+
+// Font Sizes
+$font-size-xs: 11px;
+$font-size-sm: 12px;
+$font-size-base: 13px;
+$font-size-md: 14px;
+$font-size-lg: 15px;
+$font-size-xl: 16px;
+$font-size-2xl: 18px;
+$font-size-3xl: 20px;
+$font-size-4xl: 22px;
+$font-size-5xl: 24px;
+$font-size-6xl: 28px;
+$font-size-7xl: 32px;
+
+// Semantic Font Sizes
+$font-size-caption: $font-size-xs;        // 11px
+$font-size-caption-md: $font-size-sm;     // 12px
+$font-size-body-sm: $font-size-base;      // 13px
+$font-size-body: $font-size-md;           // 14px
+$font-size-body-lg: $font-size-lg;        // 15px
+$font-size-subtitle: $font-size-xl;       // 16px
+$font-size-title: $font-size-2xl;         // 18px
+$font-size-title-lg: $font-size-3xl;      // 20px
+$font-size-h6: $font-size-4xl;            // 22px
+$font-size-h5: $font-size-5xl;            // 24px
+$font-size-h4: $font-size-6xl;            // 28px
+$font-size-h3: $font-size-7xl;            // 32px
+
+// Font Weights
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// Line Heights
+$line-height-tight: 1.2;
+$line-height-snug: 1.35;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.6;
+
+// Letter Spacing
+$letter-spacing-tight: -0.3px;
+$letter-spacing-normal: 0;
+$letter-spacing-wide: 0.3px;
+
+
+// ============================================================
+// BORDER RADIUS
+// ============================================================
+
+$border-radius-none: 0;
+$border-radius-xs: 4px;
+$border-radius-sm: 8px;
+$border-radius-md: 12px;
+$border-radius-lg: 16px;
+$border-radius-xl: 20px;
+$border-radius-2xl: 24px;
+$border-radius-full: 9999px;
+$border-radius-circle: 50%;
+
+// Semantic Border Radius
+$border-radius-button: $border-radius-md;       // 12px
+$border-radius-button-lg: $border-radius-lg;    // 16px
+$border-radius-input: $border-radius-md;        // 12px
+$border-radius-card: $border-radius-xl;         // 20px
+$border-radius-avatar: $border-radius-circle;   // 50%
+$border-radius-badge: $border-radius-full;      // 9999px
+
+
+// ============================================================
+// SHADOWS
+// ============================================================
+
+$shadow-none: none;
+$shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
+$shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+$shadow-md: 0 4px 6px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.03);
+$shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(0, 0, 0, 0.03);
+$shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.05), 0 8px 10px rgba(0, 0, 0, 0.03);
+$shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.1);
+
+// Semantic Shadows
+$shadow-card: $shadow-sm;
+$shadow-card-hover: $shadow-md;
+$shadow-card-active: $shadow-xs;
+$shadow-dialog: $shadow-xl;
+$shadow-modal: $shadow-xl;
+$shadow-dropdown: $shadow-lg;
+$shadow-button: $shadow-sm;
+$shadow-button-hover: $shadow-md;
+$shadow-button-active: $shadow-xs;
+$shadow-floating: $shadow-xl;
+
+
+// ============================================================
+// TRANSITIONS
+// ============================================================
+
+$transition-fast: 120ms ease;
+$transition-normal: 200ms ease;
+$transition-slow: 300ms ease;
+$transition-spring: 250ms cubic-bezier(0.34, 1.56, 0.64, 1);
+
+// Semantic Transitions
+$transition-button: $transition-fast;
+$transition-card: $transition-normal;
+$transition-modal: $transition-normal;
+$transition-input: $transition-fast;
+$transition-tab: $transition-normal;
+
+
+// ============================================================
+// Z-INDEX
+// ============================================================
+
+$z-index-dropdown: 100;
+$z-index-sticky: 200;
+$z-index-fixed: 300;
+$z-index-modal-backdrop: 400;
+$z-index-modal: 500;
+$z-index-popover: 600;
+$z-index-tooltip: 700;
+$z-index-toast: 800;
+
+
+// ============================================================
+// BREAKPOINTS (matching Quasar)
+// ============================================================
+
+$breakpoint-xs: 0;
+$breakpoint-sm: 600px;
+$breakpoint-md: 1024px;
+$breakpoint-lg: 1440px;
+$breakpoint-xl: 1920px;
+
+
+// ============================================================
+// COMPONENT SPECIFIC TOKENS
+// ============================================================
+
+// Page Header
+$page-header-height: 56px;
+$page-header-height-lg: 72px;
+$page-header-padding: $spacing-4 $spacing-6;      // 16px 24px
+
+// Page Content
+$page-content-padding: $spacing-page-padding;
+$page-content-padding-lg: $spacing-page-padding-lg;
+
+// Card
+$card-padding: $spacing-card-padding;
+$card-gap: $spacing-card-gap;
+
+// Button
+$button-height-sm: 32px;
+$button-height-md: 40px;
+$button-height-lg: 48px;
+$button-height-xl: 56px;
+$button-padding-sm: 0 $spacing-3;
+$button-padding-md: 0 $spacing-4;
+$button-padding-lg: 0 $spacing-6;
+$button-padding-xl: 0 $spacing-8;
+
+// Input
+$input-height-sm: 36px;
+$input-height-md: 44px;
+$input-height-lg: 52px;
+$input-padding: 0 $spacing-3;
+
+// Avatar
+$avatar-size-xs: 24px;
+$avatar-size-sm: 32px;
+$avatar-size-md: 40px;
+$avatar-size-lg: 48px;
+$avatar-size-xl: 56px;
+
+// Tab Bar (Footer)
+$tab-bar-height: 56px;
+$tab-bar-height-lg: 64px;
+
+// Modal/Dialog
+$dialog-max-width: 400px;
+$dialog-max-width-lg: 560px;
+$dialog-border-radius: $border-radius-2xl;        // 24px
+$dialog-padding: $spacing-6;
+
+
+// ============================================================
+// UTILITY MIXINS
+// ============================================================
+
+// Flexbox helpers
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-start {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+// Text truncation
+@mixin truncate($lines: 1) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  @if $lines == 1 {
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+  }
+}
+
+// Card base style
+@mixin card-base {
+  background: $color-surface-primary;
+  border: 1px solid $color-surface-border;
+  border-radius: $border-radius-card;
+  box-shadow: $shadow-card;
+  transition: box-shadow $transition-card, transform $transition-card;
+  
+  &:active {
+    box-shadow: $shadow-card-active;
+    transform: scale(0.99);
+  }
+}
+
+// Input base style
+@mixin input-base {
+  :deep(.q-field__control) {
+    border-radius: $border-radius-input;
+    border-color: $color-border-light;
+    background: $color-white;
+    transition: border-color $transition-input, box-shadow $transition-input;
+    
+    &:hover {
+      border-color: $color-border-medium;
+    }
+    
+    &.q-field--focused {
+      border-color: $color-border-focus;
+      box-shadow: 0 0 0 3px rgba(#fbac25, 0.15);
+    }
+    
+    &.q-field--error {
+      border-color: $color-error;
+      
+      &:not(.q-field--focused) {
+        box-shadow: 0 0 0 3px rgba($color-error, 0.15);
+      }
+    }
+  }
+}
+
+// Button base style
+@mixin button-base($height: $button-height-md, $padding: $button-padding-md, $radius: $border-radius-button, $weight: $font-weight-semibold) {
+  height: $height;
+  padding: $padding;
+  border-radius: $radius;
+  font-weight: $weight;
+  font-size: $font-size-body;
+  letter-spacing: $letter-spacing-normal;
+  transition: all $transition-button;
+  
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+// Page container
+@mixin page-container {
+  background: $color-bg-primary;
+  min-height: 100vh;
+  padding: $page-content-padding;
+  padding-bottom: calc(#{$page-content-padding} + #{$tab-bar-height} + env(safe-area-inset-bottom));
+  
+  @media (min-width: #{$breakpoint-md}) {
+    padding: $page-content-padding-lg;
+    padding-bottom: calc(#{$page-content-padding-lg} + #{$tab-bar-height});
+  }
+}
+
+// Screen reader only
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -1,100 +1,139 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="q-mb-md">
-      <div class="row items-center q-mb-sm">
-        <q-btn round flat dense icon="keyboard_arrow_left" @click="competenciaAnterior" />
-        <div class="text-h6 q-ml-md q-mr-md">{{ competenciaFormatada }}</div>
-        <q-btn round flat dense icon="keyboard_arrow_right" @click="competenciaProxima" />
-      </div>
-
-      <div class="row q-col-gutter-sm q-mb-md">
-        <div class="col-12 col-sm-6 col-md-3">
-          <q-card class="text-center bg-primary text-white">
-            <div class="q-pa-md">
-              <div class="text-subtitle1">Pendentes</div>
-              <div class="text-h4">{{ pendentesCount }}</div>
-              <div class="text-subtitle1">{{ formatCurrency(pendentesTotal) }}</div>
-            </div>
-          </q-card>
+  <q-page class="page">
+    <ClPageHeader
+      title="Início"
+      subtitle="Visão geral das cobranças"
+      class="page-header-compact"
+    >
+      <template #actions>
+        <div class="competence-nav">
+          <ClButton
+            variant="ghost"
+            size="sm"
+            icon="keyboard_arrow_left"
+            @click="competenciaAnterior"
+            aria-label="Competência anterior"
+          />
+          <span class="competence-nav__label">{{ competenciaFormatada }}</span>
+          <ClButton
+            variant="ghost"
+            size="sm"
+            icon="keyboard_arrow_right"
+            @click="competenciaProxima"
+            aria-label="Próxima competência"
+          />
         </div>
+      </template>
+    </ClPageHeader>
 
-        <div class="col-12 col-sm-6 col-md-3">
-          <q-card class="text-center bg-positive text-white">
-            <div class="q-pa-md">
-              <div class="text-subtitle1">Pagos</div>
-              <div class="text-h4">{{ pagosCount }}</div>
-              <div class="text-subtitle1">{{ formatCurrency(pagosTotal) }}</div>
+    <div class="page-content">
+      <!-- Summary Cards -->
+      <div class="summary-grid" role="region" aria-label="Resumo das cobranças">
+        <ClPageCard variant="elevated" class="summary-card summary-card--pending">
+          <div class="summary-card__icon" aria-hidden="true">
+            <q-icon name="pending_actions" size="24px" color="warning" />
+          </div>
+          <div class="summary-card__content">
+            <p class="summary-card__label">Pendentes</p>
+            <p class="summary-card__count">{{ pendentesCount }}</p>
+            <p class="summary-card__value">{{ formatCurrency(pendentesTotal) }}</p>
+          </div>
+        </ClPageCard>
+
+        <ClPageCard variant="elevated" class="summary-card summary-card--paid">
+          <div class="summary-card__icon" aria-hidden="true">
+            <q-icon name="check_circle" size="24px" color="positive" />
+          </div>
+          <div class="summary-card__content">
+            <p class="summary-card__label">Pagos</p>
+            <p class="summary-card__count">{{ pagosCount }}</p>
+            <p class="summary-card__value">{{ formatCurrency(pagosTotal) }}</p>
+          </div>
+        </ClPageCard>
+      </div>
+
+      <ClLoadingState v-if="loading" label="Carregando cobranças..." size="lg" />
+
+      <template v-else>
+        <ClEmptyState
+          v-if="cobrancasFiltradas.length === 0"
+          icon="inbox"
+          title="Nenhuma cobrança"
+          description="Não há cobranças para esta competência."
+        />
+
+        <div v-else class="charges-list" role="list" aria-label="Lista de cobranças">
+          <div
+            v-for="cobranca in cobrancasFiltradas"
+            :key="cobranca.id as number"
+            class="charge-item"
+            role="listitem"
+          >
+            <div class="charge-item__main" @click="abrirModal({ id: cobranca.id, nome: cobranca.nome })">
+              <div class="charge-item__avatar">
+                <ClAvatar
+                  :name="cobranca.nome"
+                  size="md"
+                  shape="circle"
+                  :color="cobranca.pendente ? 'warning' : 'positive'"
+                />
+              </div>
+              
+              <div class="charge-item__info">
+                <h3 class="charge-item__name">{{ cobranca.nome }}</h3>
+                <p class="charge-item__phone">{{ cobranca.telefone }}</p>
+              </div>
+              
+              <div class="charge-item__amount">
+                <span class="charge-item__value">{{ formatCurrency(cobranca.valorTotal) }}</span>
+                <span class="charge-item__due">{{ cobranca.vencimentoFormatado }}</span>
+              </div>
             </div>
-          </q-card>
+            
+            <div class="charge-item__actions">
+              <ClButton
+                v-if="cobranca.pendente"
+                variant="success"
+                size="sm"
+                label="Dar Baixa"
+                @click.stop="baixarCobranca(cobranca.id as number)"
+              />
+              <q-icon v-else name="check_circle" color="positive" size="20px" />
+            </div>
+          </div>
         </div>
-      </div>
+      </template>
     </div>
 
-    <div v-if="loading" class="q-mx-auto">
-      <q-spinner-dots size="48px" color="primary" />
-    </div>
-
-    <div v-else>
-      <q-separator class="q-my-md" />
-
-      <div v-if="cobrancasFiltradas.length === 0" class="text-center q-py-md">
-        <div class="text-body1">Nenhuma cobrança encontrada para esta competencia.</div>
-      </div>
-
-      <q-list v-else separator>
-        <q-item
-          v-for="cobranca in cobrancasFiltradas"
-          :key="cobranca.id as number"
-          class="q-py-sm"
-          clickable
-          @click="abrirModal({ id: cobranca.id, nome: cobranca.nome })"
-        >
-          <q-item-section avatar>
-            <q-avatar>
-              <q-icon :color="cobranca.statusColor" :name="cobranca.statusIcon"> </q-icon>
-            </q-avatar>
-          </q-item-section>
-
-          <q-item-section>
-            <div class="text-subtitle1">{{ cobranca.nome }}</div>
-            <div class="text-caption">{{ cobranca.telefone }}</div>
-          </q-item-section>
-
-          <q-item-section side top class="text-right">
-            <div class="text-h6">{{ formatCurrency(cobranca.valorTotal) }}</div>
-            <div class="text-caption">{{ cobranca.vencimentoFormatado }}</div>
-          </q-item-section>
-
-          <q-item-section side>
-            <q-btn
-              v-if="cobranca.pendente"
-              round
-              flat
-              dense
-              color="positive"
-              label="Dar Baixa"
-              @click.stop="baixarCobranca(cobranca.id as number)"
-            />
-            <q-icon v-else name="check_circle" color="positive" size="18px" />
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </div>
+    <ClDialog
+      v-model="modalAberto"
+      title="Cobranças Extras"
+      :full-mobile="true"
+    >
+      <CobrancaExtraModal
+        v-model="modalAberto"
+        :cobranca-id="cobrancaSelecionada?.id ?? 0"
+        :cliente-nome="cobrancaSelecionada?.nome ?? ''"
+        :competencia="competenciaAtual"
+        @saved="carregarCobrancas"
+      />
+    </ClDialog>
   </q-page>
-
-  <CobrancaExtraModal
-    v-model="modalAberto"
-    :cobranca-id="cobrancaSelecionada?.id ?? 0"
-    :cliente-nome="cobrancaSelecionada?.nome ?? ''"
-    :competencia="competenciaAtual"
-    @saved="carregarCobrancas"
-  />
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed, onMounted } from 'vue';
 import { useCobrancaStore } from 'src/stores/cobranca-store';
 import { useClientesStore } from 'src/stores/cliente-store';
+import { 
+  ClPageHeader, 
+  ClPageCard, 
+  ClButton, 
+  ClDialog, 
+  ClEmptyState, 
+  ClLoadingState, 
+  ClAvatar 
+} from 'src/components/ui';
 import CobrancaExtraModal from 'src/components/CobrancaExtraModal.vue';
 
 // Filtro para formatar moeda (R$ 0,00)
@@ -113,8 +152,6 @@ const clienteStore = useClientesStore();
 
 // Estado local
 const loading = ref(false);
-
-// Competencia atual (formato YYYY-MM)
 const competenciaAtual = ref<string>('');
 
 // Computeds
@@ -124,7 +161,6 @@ const competenciaFormatada = computed(() => {
   return `${mes}/${ano}`;
 });
 
-// Cobrancas da competencia atual
 const cobrancasMensais = computed(() => cobrancaStore.cobrancasMensais);
 
 // Loading status
@@ -145,7 +181,7 @@ watch(
   },
 );
 
-// Funções de navegação de competencia
+// Funções de navegação de competência
 const competenciaAnterior = () => {
   if (!competenciaAtual.value) return;
   const parts = competenciaAtual.value.split('-').map(Number);
@@ -182,17 +218,13 @@ const carregarCobrancas = async () => {
 
 // Inicializar
 const init = async () => {
-  // Define competencia atual como mês/ano corrente
   const now = new Date();
   const ano = now.getFullYear();
   const mes = String(now.getMonth() + 1).padStart(2, '0');
   const competenciaCorrente = `${ano}-${mes}`;
   competenciaAtual.value = competenciaCorrente;
 
-  // Carregar clientes antes das cobranças para exibir nomes corretamente
   await clienteStore.carregar();
-
-  // Garante que as cobrancas do mes corrente sejam geradas (se nao existirem)
   await cobrancaStore.verificarEGerarCobrancasDoMes();
   await carregarCobrancas();
 };
@@ -226,10 +258,8 @@ const cobrancasFiltradas = computed(() => {
       ...cobranca,
       nome: cliente?.nome ?? 'Desconhecido',
       telefone: cliente?.telefone ?? '',
-      valorTotal: cobranca.valor_mensalidade, // TODO: adicionar soma dos extras quando implementado
+      valorTotal: cobranca.valor_mensalidade,
       vencimentoFormatado: new Date(cobranca.vencimento).toLocaleDateString('pt-BR'),
-      statusColor: cobranca.data_pagamento ? 'positive' : 'negative',
-      statusIcon: cobranca.data_pagamento ? 'check_circle' : 'error_outline',
       pendente: !cobranca.data_pagamento,
     };
   });
@@ -238,7 +268,6 @@ const cobrancasFiltradas = computed(() => {
 // Funcao para dar baixa em uma cobranca
 const baixarCobranca = async (id: number) => {
   await cobrancaStore.baixarCobranca(id);
-  // Recarregar a competencia atual para refletir a alteracao
   await carregarCobrancas();
 };
 
@@ -260,3 +289,229 @@ onMounted(async () => {
   await init();
 });
 </script>
+
+<style scoped lang="scss">
+.page {
+  background: var(--color-bg-primary);
+  min-height: 100vh;
+  padding-bottom: calc(var(--tab-bar-height) + env(safe-area-inset-bottom));
+}
+
+.page-header-compact {
+  padding: var(--spacing-4) var(--spacing-6);
+  margin: 0;
+  border-bottom: 1px solid var(--color-border-light);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.competence-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.competence-nav__label {
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  min-width: 80px;
+  text-align: center;
+}
+
+.page-content {
+  padding: var(--spacing-4) var(--spacing-6);
+  padding-bottom: calc(var(--spacing-4) + var(--tab-bar-height) + env(safe-area-inset-bottom));
+  
+  @media (min-width: #{$breakpoint-md}) {
+    padding: var(--spacing-6) var(--spacing-8);
+    padding-bottom: calc(var(--spacing-6) + var(--tab-bar-height));
+  }
+}
+
+// Summary Grid
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-6);
+  
+  @media (min-width: #{$breakpoint-md}) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-4);
+  }
+}
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  transition: transform var(--transition-card), box-shadow var(--transition-card);
+  
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+  }
+  
+  @media (hover: none) and (pointer: coarse) {
+    &:active {
+      transform: scale(0.99);
+      box-shadow: var(--shadow-xs);
+    }
+  }
+}
+
+.summary-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--border-radius-lg);
+  background: var(--color-bg-tertiary);
+  flex-shrink: 0;
+}
+
+.summary-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.summary-card__label {
+  margin: 0 0 var(--spacing-1);
+  font-size: var(--font-size-caption-md);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+.summary-card__count {
+  margin: 0 0 var(--spacing-1);
+  font-size: var(--font-size-h6);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.summary-card__value {
+  margin: 0;
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-tertiary);
+}
+
+.summary-card--pending .summary-card__icon {
+  background: rgba(var(--color-warning-rgb), 0.15);
+}
+
+.summary-card--paid .summary-card__icon {
+  background: rgba(var(--color-positive-rgb), 0.15);
+}
+
+// Charges List
+.charges-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.charge-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-surface-border);
+  border-radius: var(--border-radius-card);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--transition-card), transform var(--transition-card);
+  
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      box-shadow: var(--shadow-md);
+    }
+  }
+  
+  @media (hover: none) and (pointer: coarse) {
+    &:active {
+      box-shadow: var(--shadow-xs);
+      transform: scale(0.99);
+    }
+  }
+}
+
+.charge-item__main {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.charge-item__avatar {
+  flex-shrink: 0;
+}
+
+.charge-item__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.charge-item__name {
+  margin: 0 0 var(--spacing-1);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.charge-item__phone {
+  margin: 0;
+  font-size: var(--font-size-caption-md);
+  color: var(--color-text-tertiary);
+  line-height: var(--line-height-normal);
+}
+
+.charge-item__amount {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-1);
+  flex-shrink: 0;
+  min-width: 90px;
+  
+  @media (max-width: 599px) {
+    min-width: 80px;
+  }
+}
+
+.charge-item__value {
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+  white-space: nowrap;
+}
+
+.charge-item__due {
+  font-size: var(--font-size-caption-md);
+  color: var(--color-text-tertiary);
+  white-space: nowrap;
+}
+
+.charge-item__actions {
+  flex-shrink: 0;
+  margin-left: var(--spacing-2);
+}
+</style>

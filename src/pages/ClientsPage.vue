@@ -1,154 +1,133 @@
 <template>
-  <q-page class="clients-page">
-    <!-- Header -->
-    <div class="page-header q-px-lg q-pt-lg q-pb-md bg-primary">
-      <div class="row items-center justify-between">
-        <div>
-          <div class="page-title">Clientes</div>
-          <div class="page-subtitle text-grey-8">{{ store.clientes.length }} cadastrados</div>
-        </div>
-        <q-btn round unelevated icon="add" class="btn-add" @click="abrirDialogNovo" />
+  <q-page class="page">
+    <ClPageHeader
+      title="Clientes"
+      :subtitle="`${store.clientes.length} cadastrados`"
+    >
+      <template #actions>
+        <ClButton
+          variant="primary"
+          size="md"
+          icon="add"
+          label="Novo"
+          @click="abrirDialogNovo"
+        />
+      </template>
+    </ClPageHeader>
+
+    <div class="page-content">
+      <div class="search-wrapper">
+        <ClFormField
+          v-model="busca"
+          placeholder="Buscar cliente..."
+          type="search"
+          prependIcon="search"
+          :appendIcon="busca ? 'close' : undefined"
+          @append:click="busca = ''"
+          class="search-field"
+        />
       </div>
 
-      <!-- Search -->
-      <q-input
-        v-model="busca"
-        placeholder="Buscar cliente..."
-        outlined
-        dense
-        class="search-input q-mt-md"
-        bg-color="white"
-      >
-        <template #prepend>
-          <q-icon name="search" color="grey-5" size="18px" />
-        </template>
-        <template #append>
-          <q-icon
-            v-if="busca"
-            name="close"
-            color="grey-5"
-            size="16px"
-            class="cursor-pointer"
-            @click="busca = ''"
-          />
-        </template>
-      </q-input>
-    </div>
+      <ClLoadingState v-if="store.loading" label="Carregando clientes..." />
 
-    <!-- Loading -->
-    <div v-if="store.loading" class="flex flex-center q-pa-xl">
-      <q-spinner-dots color="primary" size="40px" />
-    </div>
+      <template v-else>
+        <ClEmptyState
+          v-if="clientesFiltrados.length === 0"
+          :icon="busca ? 'search_off' : 'people_outline'"
+          :title="busca ? 'Nenhum resultado' : 'Nenhum cliente ainda'"
+          :description="busca ? 'Tente outro termo' : 'Toque em Novo para adicionar'"
+        />
 
-    <!-- Empty state -->
-    <div v-else-if="clientesFiltrados.length === 0" class="empty-state q-pa-xl">
-      <q-icon name="people_outline" size="56px" color="grey-4" />
-      <div class="empty-title">
-        {{ busca ? 'Nenhum resultado' : 'Nenhum cliente ainda' }}
-      </div>
-      <div class="empty-sub">
-        {{ busca ? 'Tente outro termo' : 'Toque em + para adicionar' }}
-      </div>
-    </div>
-
-    <!-- List -->
-    <q-list v-else class="clients-list q-px-md">
-      <transition-group name="list">
-        <div v-for="cliente in clientesFiltrados" :key="cliente.id" class="client-card q-mb-sm">
-          <div class="row items-center no-wrap q-pa-md">
-            <!-- Avatar -->
-            <div class="avatar-circle">
-              {{ iniciais(cliente.nome) }}
-            </div>
-
-            <!-- Info -->
-            <div class="col q-ml-md">
-              <div class="client-name row items-center q-gutter-xs">
-                {{ cliente.nome }}
-                <q-badge
-                  v-if="!cliente.ativo"
-                  color="grey-4"
-                  text-color="grey-7"
-                  label="Inativo"
-                  class="text-caption"
+        <div v-else class="clients-list" role="list" aria-label="Lista de clientes">
+          <transition-group name="list" tag="div">
+            <div
+              v-for="cliente in clientesFiltrados"
+              :key="cliente.id"
+              class="client-card"
+              role="listitem"
+            >
+              <div class="client-card__main">
+                <ClAvatar
+                  :name="cliente.nome"
+                  size="md"
+                  shape="circle"
+                />
+                
+                <div class="client-card__info">
+                  <div class="client-card__name-row">
+                    <h3 class="client-card__name">{{ cliente.nome }}</h3>
+                    <ClBadge
+                      v-if="!cliente.ativo"
+                      variant="secondary"
+                      size="sm"
+                    >
+                      Inativo
+                    </ClBadge>
+                  </div>
+                  
+                  <p class="client-card__phone">
+                    <q-icon name="phone" size="12px" class="q-mr-xs" />
+                    {{ cliente.telefone || 'Sem telefone' }}
+                  </p>
+                </div>
+              </div>
+              
+              <div class="client-card__actions">
+                <ClButton
+                  variant="ghost"
+                  size="sm"
+                  icon="edit"
+                  @click="abrirDialogEditar(cliente)"
+                  aria-label="Editar cliente"
+                />
+                <ClButton
+                  variant="ghost"
+                  size="sm"
+                  icon="delete_outline"
+                  class="btn-delete"
+                  @click="confirmarExclusao(cliente)"
+                  aria-label="Excluir cliente"
                 />
               </div>
-              <div class="client-phone">
-                <q-icon name="phone" size="12px" class="q-mr-xs" />
-                {{ cliente.telefone || 'Sem telefone' }}
-              </div>
             </div>
-
-            <!-- Actions -->
-            <div class="row items-center gap-xs">
-              <q-btn
-                flat
-                round
-                dense
-                icon="edit"
-                color="grey-6"
-                size="sm"
-                @click="abrirDialogEditar(cliente)"
-              />
-              <q-btn
-                flat
-                round
-                dense
-                icon="delete_outline"
-                color="negative"
-                size="sm"
-                @click="confirmarExclusao(cliente)"
-              />
-            </div>
-          </div>
+          </transition-group>
         </div>
-      </transition-group>
-    </q-list>
+      </template>
+    </div>
 
     <!-- Dialog novo/editar -->
-    <q-dialog v-model="dialog" persistent class="dialog-no-overflow">
-      <q-card class="form-card column full-width-mobile">
-        <q-card-section class="q-px-md q-px-lg@sm dialog-header">
-          <div class="dialog-title">
-            {{ editando ? 'Editar cliente' : 'Novo cliente' }}
-          </div>
-        </q-card-section>
-
-        <q-card-section class="q-px-md q-px-lg@sm q-pb-md dialog-content">
-          <div class="column q-gutter-md">
-            <q-input
-              v-model="form.nome"
-              label="Nome *"
-              outlined
-              dense
-              hide-bottom-space
-              :error="!!erros.nome"
-              :error-message="erros.nome"
-              @update:model-value="erros.nome = ''"
-            />
-
-            <q-input
-              v-model="form.telefone"
-              label="Telefone"
-              outlined
-              dense
-              mask="(##) #####-####"
-              unmasked-value
-              hide-bottom-space
-            />
-
-            <q-input
-              v-model="dataNascimentoFormatada"
-              label="Data de nascimento"
-              outlined
-              dense
-              readonly
-              hide-bottom-space
-            >
-              <template v-slot:prepend>
-                <q-icon name="event" />
-              </template>
-
+    <ClDialog
+      v-model="dialog"
+      :title="editando ? 'Editar cliente' : 'Novo cliente'"
+      :full-mobile="true"
+    >
+      <form @submit.prevent="salvar" class="client-form">
+        <div class="form-section">
+          <ClFormField
+            v-model="form.nome"
+            label="Nome *"
+            placeholder="Nome do cliente"
+            :error="erros.nome"
+            :required="true"
+            autofocus
+          />
+          
+          <ClFormField
+            v-model="form.telefone"
+            label="Telefone"
+            placeholder="(00) 00000-0000"
+            type="tel"
+            prependIcon="phone"
+          />
+          
+          <ClFormField
+            v-model="dataNascimentoFormatada"
+            label="Data de nascimento"
+            type="text"
+            readonly
+            prependIcon="event"
+          >
+            <template #append>
               <q-popup-proxy cover transition-show="scale" transition-hide="scale">
                 <q-date v-model="form.birth_date" mask="YYYY-MM-DD">
                   <div class="row items-center justify-end">
@@ -156,20 +135,17 @@
                   </div>
                 </q-date>
               </q-popup-proxy>
-            </q-input>
-
-            <q-input
-              v-model="dataRegistroFormatada"
-              label="Data de registro"
-              outlined
-              dense
-              readonly
-              hide-bottom-space
-            >
-              <template v-slot:prepend>
-                <q-icon name="event" />
-              </template>
-
+            </template>
+          </ClFormField>
+          
+          <ClFormField
+            v-model="dataRegistroFormatada"
+            label="Data de registro"
+            type="text"
+            readonly
+            prependIcon="event"
+          >
+            <template #append>
               <q-popup-proxy cover transition-show="scale" transition-hide="scale">
                 <q-date v-model="form.created_at" mask="YYYY-MM-DD">
                   <div class="row items-center justify-end">
@@ -177,109 +153,95 @@
                   </div>
                 </q-date>
               </q-popup-proxy>
-            </q-input>
-
-            <q-input
-              v-model="form.obs"
-              label="Observações"
-              outlined
-              type="textarea"
-              autogrow
-              hide-bottom-space
-              input-style="min-height: 80px"
-            />
-
-            <!-- Mensalidade Config -->
-            <q-separator class="q-my-md" />
-            <div class="text-subtitle2 text-grey-8 q-mb-sm">Configuração de Mensalidade (opcional)</div>
-            <div class="text-caption text-grey-6 q-mb-md">Deixe em branco para usar os valores globais</div>
-
-            <q-input
-              v-model="form.mensalidade_valor"
-              label="Valor da mensalidade (R$)"
-              placeholder="Ex: 150.00"
-              outlined
-              dense
-              hide-bottom-space
-              prefix="R$ "
-              type="text"
-              @update:model-value="erros.mensalidade_valor = ''"
-              :error="!!erros.mensalidade_valor"
-              :error-message="erros.mensalidade_valor"
-              :rules="[
-                (val) => val == null || val === '' || (Number(val) > 0) || 'Valor deve ser maior que zero',
-              ]"
-            >
-              <template #append>
-                <q-icon name="currency_real" size="16px" color="grey-5" />
-              </template>
-            </q-input>
-
-            <q-input
-              v-model="form.mensalidade_dia_vencimento"
-              label="Dia de vencimento"
-              placeholder="Ex: 5"
-              outlined
-              dense
-              hide-bottom-space
-              type="text"
-              @update:model-value="erros.mensalidade_dia_vencimento = ''"
-              :error="!!erros.mensalidade_dia_vencimento"
-              :error-message="erros.mensalidade_dia_vencimento"
-              :rules="[
-                (val) => val == null || val === '' || Number.isInteger(Number(val)) || 'Informe um dia inteiro',
-                (val) => val == null || val === '' || (Number(val) >= 1 && Number(val) <= 31) || 'Dia deve estar entre 1 e 31',
-              ]"
-            >
-              <template #append>
-                <q-icon name="event" size="16px" color="grey-5" />
-              </template>
-            </q-input>
-
-            <div class="row items-center justify-between q-mt-xs">
-              <div>
-                <div class="text-body2 text-grey-8">Cliente ativo</div>
-                <div class="text-caption text-grey-5">Desative para não gerar cobrança</div>
-              </div>
-              <q-toggle v-model="form.ativo" color="primary" keep-color />
-            </div>
-          </div>
-        </q-card-section>
-
-        <q-card-actions align="right" class="q-px-md q-px-lg@sm q-pb-lg dialog-actions">
-          <q-btn flat label="Cancelar" color="grey-6" v-close-popup />
-          <q-btn
-            unelevated
-            :label="editando ? 'Salvar' : 'Adicionar'"
-            color="primary"
-            :loading="salvando"
-            @click="salvar"
+            </template>
+          </ClFormField>
+          
+          <ClFormTextarea
+            v-model="form.obs"
+            label="Observações"
+            placeholder="Observações opcionais"
+            :rows="3"
           />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+        </div>
+        
+        <ClPageCard variant="borderless" class="mensalidade-config" :padded="false">
+          <div class="mensalidade-config__header">
+            <h4 class="mensalidade-config__title">Configuração de Mensalidade</h4>
+            <p class="mensalidade-config__subtitle">Deixe em branco para usar os valores globais</p>
+          </div>
+          
+          <ClFormField
+            v-model="form.mensalidade_valor"
+            label="Valor da mensalidade (R$)"
+            placeholder="Ex: 150.00"
+            type="text"
+            prepend="R$ "
+            :error="erros.mensalidade_valor"
+            @update:model-value="erros.mensalidade_valor = ''"
+          >
+            <template #append>
+              <q-icon name="currency_real" size="16px" color="grey-5" />
+            </template>
+          </ClFormField>
+          
+          <ClFormField
+            v-model="form.mensalidade_dia_vencimento"
+            label="Dia de vencimento"
+            placeholder="Ex: 5"
+            type="text"
+            :error="erros.mensalidade_dia_vencimento"
+            @update:model-value="erros.mensalidade_dia_vencimento = ''"
+          >
+            <template #append>
+              <q-icon name="event" size="16px" color="grey-5" />
+            </template>
+          </ClFormField>
+          
+          <div class="mensalidade-config__toggle">
+            <div>
+              <p class="mensalidade-config__toggle-label">Cliente ativo</p>
+              <p class="mensalidade-config__toggle-hint">Desative para não gerar cobrança</p>
+            </div>
+            <q-toggle v-model="form.ativo" color="primary" keep-color />
+          </div>
+        </ClPageCard>
+      </form>
+      
+      <template #footer>
+        <div class="dialog-footer">
+          <ClButton variant="ghost" @click="dialog = false">Cancelar</ClButton>
+          <ClButton
+            variant="primary"
+            :label="editando ? 'Salvar' : 'Adicionar'"
+            type="submit"
+            form="client-form"
+            :loading="salvando"
+          />
+        </div>
+      </template>
+    </ClDialog>
 
     <!-- Dialog confirmar exclusão -->
-    <q-dialog v-model="dialogExclusao" persistent>
-      <q-card class="delete-confirm-card">
-        <q-card-section class="q-px-lg q-pt-lg q-pb-md">
-          <div class="text-h6 q-mb-md">Excluir cliente</div>
-          <div class="text-body1">
-            Tem certeza que deseja excluir <strong>{{ clienteSelecionado?.nome }}</strong>?
-          </div>
-        </q-card-section>
-        <q-card-actions align="right" class="q-px-lg q-pb-lg">
-          <q-btn flat label="Cancelar" color="grey-6" v-close-popup />
-          <q-btn
-            unelevated
+    <ClDialog
+      v-model="dialogExclusao"
+      title="Excluir cliente"
+    >
+      <p class="dialog-message">
+        Tem certeza que deseja excluir <strong>{{ clienteSelecionado?.nome }}</strong>?
+      </p>
+      
+      <template #footer>
+        <div class="dialog-footer">
+          <ClButton variant="ghost" @click="dialogExclusao = false">Cancelar</ClButton>
+          <ClButton
+            variant="destructive"
             label="Excluir"
-            color="negative"
             :loading="excluindo"
             @click="excluir"
           />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
+        </div>
+      </template>
+    </ClDialog>
   </q-page>
 </template>
 
@@ -288,6 +250,18 @@ import { ref, computed, onMounted } from 'vue';
 import { useClientesStore } from 'src/stores/cliente-store';
 import type { Cliente } from 'src/database/repositories/cliente-repository';
 import { date } from 'quasar';
+import { 
+  ClPageHeader, 
+  ClPageCard, 
+  ClButton, 
+  ClDialog, 
+  ClEmptyState, 
+  ClLoadingState, 
+  ClAvatar, 
+  ClBadge, 
+  ClFormField, 
+  ClFormTextarea 
+} from 'src/components/ui';
 
 const store = useClientesStore();
 
@@ -318,18 +292,12 @@ const form = ref({
 });
 const erros = ref({ nome: '', mensalidade_valor: '', mensalidade_dia_vencimento: '' });
 
-const dataRegistroFormatada = computed(() => {
-  return formatCustomDate(form.value.created_at);
-});
-const dataNascimentoFormatada = computed(() => {
-  return formatCustomDate(form.value.birth_date);
-});
+const dataRegistroFormatada = computed(() => formatCustomDate(form.value.created_at));
+const dataNascimentoFormatada = computed(() => formatCustomDate(form.value.birth_date));
 
 function formatCustomDate(dateStr: string | null | undefined) {
   if (!dateStr) return '';
-
   const [year, month, day] = dateStr.split('-');
-
   return `${day}/${month}/${year}`;
 }
 
@@ -372,7 +340,6 @@ async function salvar() {
     return;
   }
 
-  // Validate mensalidade config
   if (form.value.mensalidade_valor !== '') {
     const valor = Number(form.value.mensalidade_valor);
     if (isNaN(valor) || valor <= 0) {
@@ -399,10 +366,9 @@ async function salvar() {
       created_at: form.value.created_at || '',
     };
 
-    // Add mensalidade_config if any value provided
     if (form.value.mensalidade_valor !== '' || form.value.mensalidade_dia_vencimento !== '') {
       payload.mensalidade_config = {
-        cliente_id: 0, // Will be set by repository
+        cliente_id: 0,
         valor: form.value.mensalidade_valor !== '' ? Number(form.value.mensalidade_valor) : undefined,
         dia_vencimento: form.value.mensalidade_dia_vencimento !== '' ? Number(form.value.mensalidade_dia_vencimento) : undefined,
       };
@@ -425,7 +391,6 @@ async function salvar() {
         return;
       }
     }
-
     erros.value.nome = 'Erro ao salvar cliente';
   } finally {
     salvando.value = false;
@@ -452,195 +417,206 @@ async function excluir() {
   }
 }
 
-// Utils
-function iniciais(nome: string): string {
-  return nome
-    .split(' ')
-    .slice(0, 2)
-    .map((p) => p[0])
-    .join('')
-    .toUpperCase();
-}
-
 onMounted(() => void store.carregar());
 </script>
 
 <style scoped lang="scss">
-.clients-page {
-  background: #f5f5f7;
+.page {
+  background: var(--color-bg-primary);
   min-height: 100vh;
+  padding-bottom: calc(var(--tab-bar-height) + env(safe-area-inset-bottom));
 }
 
-.page-header {
-  background: #fff;
-  border-bottom: 1px solid #ebebeb;
-}
-
-.btn-add {
-  background: #1a1a1a !important;
-  color: #fff !important;
-  width: 44px;
-  height: 44px;
-}
-
-.search-input {
-  :deep(.q-field__control) {
-    border-radius: 12px;
-    border-color: #e8e8e8;
+.page-content {
+  padding: var(--spacing-4) var(--spacing-6);
+  padding-bottom: calc(var(--spacing-4) + var(--tab-bar-height) + env(safe-area-inset-bottom));
+  
+  @media (min-width: #{$breakpoint-md}) {
+    padding: var(--spacing-6) var(--spacing-8);
+    padding-bottom: calc(var(--spacing-6) + var(--tab-bar-height));
   }
+}
+
+.search-wrapper {
+  margin-bottom: var(--spacing-6);
+}
+
+.search-field {
+  max-width: 400px;
 }
 
 .clients-list {
-  padding-top: 12px;
-  padding-bottom: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
 }
 
 .client-card {
-  background: #fff;
-  border-radius: 14px;
-  border: 1px solid #ebebeb;
-  overflow: hidden;
-  transition: box-shadow 0.15s ease;
-
-  &:active {
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-surface-border);
+  border-radius: var(--border-radius-card);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--transition-card), transform var(--transition-card);
+  
+  @media (hover: hover) and (pointer: fine) {
+    &:hover {
+      box-shadow: var(--shadow-md);
+    }
+  }
+  
+  @media (hover: none) and (pointer: coarse) {
+    &:active {
+      box-shadow: var(--shadow-card-active);
+      transform: scale(0.99);
+    }
   }
 }
 
-.avatar-circle {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #1a1a1a;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 600;
+.client-card__main {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  letter-spacing: 0.5px;
-}
-
-.client-name {
-  font-size: 15px;
-  font-weight: 600;
-  color: #1a1a1a;
-  line-height: 1.3;
-}
-
-.client-phone {
-  font-size: 12px;
-  color: #999;
-  margin-top: 2px;
-  display: flex;
-  align-items: center;
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding-top: 80px;
-}
-
-.empty-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #555;
-}
-
-.empty-sub {
-  font-size: 13px;
-  color: #aaa;
-}
-
-.form-card {
-  width: 100%;
-  max-width: 400px;
-  border-radius: 20px !important;
-  overflow: hidden;
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-}
-
-.full-width-mobile {
-  @media (max-width: 599px) {
-    max-width: 100%;
-    margin: 0;
-    border-radius: 0 !important;
-    height: 100%;
-    max-height: 100%;
-  }
-}
-
-.dialog-header {
-  padding: 20px 24px 16px;
-  border-bottom: 1px solid #f0f0f0;
-  flex-shrink: 0;
-}
-
-.dialog-content {
+  gap: var(--spacing-3);
   flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-  padding-bottom: 8px;
-  overflow-x: hidden;
-  max-width: 100%;
+  min-width: 0;
 }
 
-.dialog-content :deep(.q-field) {
+.client-card__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.client-card__name-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex-wrap: wrap;
+}
+
+.client-card__name {
+  margin: 0;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.client-card__phone {
+  margin: var(--spacing-1) 0 0;
+  font-size: var(--font-size-caption-md);
+  color: var(--color-text-tertiary);
+  display: flex;
+  align-items: center;
+  line-height: var(--line-height-normal);
+}
+
+.client-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  flex-shrink: 0;
+}
+
+.btn-delete {
+  color: var(--color-negative);
+  
+  &:hover {
+    background: rgba(var(--color-negative-rgb), 0.08);
+  }
+}
+
+// Form
+.client-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  width: 100%;
   max-width: 100%;
   box-sizing: border-box;
 }
 
-.dialog-content .column {
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.form-section :deep(.form-field) {
   max-width: 100%;
-  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
-.dialog-actions {
-  flex-shrink: 0;
-  padding-top: 8px;
-  border-top: 1px solid #f0f0f0;
-  margin-top: auto;
+// Mensalidade config
+.mensalidade-config {
+  padding: 0;
+  border-top: 1px solid var(--color-border-light);
+  margin-top: var(--spacing-4);
+  padding-top: var(--spacing-4);
 }
 
-.dialog-title {
-  font-size: 17px;
-  font-weight: 700;
-  color: #1a1a1a;
+.mensalidade-config__header {
+  margin: 0 0 var(--spacing-4);
 }
 
-.delete-confirm-card {
-  min-width: 280px;
-  max-width: 90vw;
-  border-radius: 16px !important;
+.mensalidade-config__title {
+  margin: 0 0 var(--spacing-1);
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
 }
 
-:deep(.dialog-no-overflow .q-dialog__inner) {
-  overflow-x: hidden;
-  max-width: 100vw;
-  border-radius: 20px;
+.mensalidade-config__subtitle {
+  margin: 0;
+  font-size: var(--font-size-caption-md);
+  color: var(--color-text-tertiary);
 }
 
-:deep(.delete-confirm-card + .q-dialog__inner) {
-  border-radius: 16px;
+.mensalidade-config__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--spacing-2);
+  border-top: 1px solid var(--color-border-light);
+  margin-top: var(--spacing-2);
 }
 
-:deep(.full-width-mobile .q-dialog__inner) {
-  @media (max-width: 599px) {
-    max-width: 100vw;
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    max-height: 100vh;
-    border-radius: 0;
-  }
+.mensalidade-config__toggle-label {
+  margin: 0 0 var(--spacing-1);
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.mensalidade-config__toggle-hint {
+  margin: 0;
+  font-size: var(--font-size-caption);
+  color: var(--color-text-tertiary);
+}
+
+// Dialog
+#client-form {
+  width: 100%;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-3);
+  width: 100%;
+}
+
+.dialog-message {
+  margin: 0;
+  font-size: var(--font-size-body);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
 }
 
 // List transition
