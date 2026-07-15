@@ -189,6 +189,9 @@ const init = async () => {
   const competenciaCorrente = `${ano}-${mes}`;
   competenciaAtual.value = competenciaCorrente;
 
+  // Carregar clientes antes das cobranças para exibir nomes corretamente
+  await clienteStore.carregar();
+
   // Garante que as cobrancas do mes corrente sejam geradas (se nao existirem)
   await cobrancaStore.verificarEGerarCobrancasDoMes();
   await carregarCobrancas();
