@@ -109,6 +109,7 @@ function generateColor(str: string): string {
   font-weight: var(--font-weight-semibold);
   line-height: 1;
   user-select: none;
+  padding: var(--spacing-1);
 }
 
 .avatar__image {
@@ -158,7 +159,7 @@ function generateColor(str: string): string {
 
 // Shapes
 .avatar--circle {
-  border-radius: var(--border-radius-circle);
+  border-radius: var(--border-radius-full);
 }
 
 .avatar--square {
