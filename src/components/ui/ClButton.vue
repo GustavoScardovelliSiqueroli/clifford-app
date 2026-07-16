@@ -4,6 +4,7 @@
     :disabled="disabled || loading"
     :type="type"
     @click="handleClick"
+    :aria-label="icon && !label ? label : undefined"
   >
     <span v-if="loading" class="btn__spinner" aria-hidden="true">
       <q-spinner-dots :size="spinnerSize" color="currentColor" />
@@ -76,10 +77,10 @@ const spinnerSize = computed(() => {
 
 const iconSize = computed(() => {
   switch (props.size) {
-    case 'sm': return '16px'
+    case 'sm': return '18px'
     case 'lg':
-    case 'xl': return '20px'
-    default: return '18px'
+    case 'xl': return '22px'
+    default: return '20px'
   }
 })
 
@@ -117,27 +118,32 @@ function handleClick(event: MouseEvent) {
   }
 }
 
+// Tamanhos - Touch targets mínimos 44px (Material Design)
 .btn--sm {
-  height: var(--button-height-sm);
-  padding: var(--button-padding-sm);
+  height: 36px;
+  min-height: 36px;
+  padding: 0 var(--spacing-3);
   font-size: var(--font-size-body-sm);
 }
 
 .btn--md {
-  height: var(--button-height-md);
-  padding: var(--button-padding-md);
+  height: 44px;
+  min-height: 44px;
+  padding: 0 var(--spacing-4);
   font-size: var(--font-size-body);
 }
 
 .btn--lg {
-  height: var(--button-height-lg);
-  padding: var(--button-padding-lg);
+  height: 52px;
+  min-height: 52px;
+  padding: 0 var(--spacing-6);
   font-size: var(--font-size-body-lg);
 }
 
 .btn--xl {
-  height: var(--button-height-xl);
-  padding: var(--button-padding-xl);
+  height: 60px;
+  min-height: 60px;
+  padding: 0 var(--spacing-8);
   font-size: var(--font-size-body-lg);
 }
 
@@ -147,41 +153,80 @@ function handleClick(event: MouseEvent) {
 
 .btn--round {
   border-radius: var(--border-radius-full) !important;
-  padding-left: var(--button-height-md) !important;
-  padding-right: var(--button-height-md) !important;
+  padding-left: 44px !important;
+  padding-right: 44px !important;
   
   &.btn--sm {
-    padding-left: var(--button-height-sm) !important;
-    padding-right: var(--button-height-sm) !important;
+    padding-left: 36px !important;
+    padding-right: 36px !important;
   }
   
   &.btn--lg {
-    padding-left: var(--button-height-lg) !important;
-    padding-right: var(--button-height-lg) !important;
+    padding-left: 52px !important;
+    padding-right: 52px !important;
   }
   
   &.btn--xl {
-    padding-left: var(--button-height-xl) !important;
-    padding-right: var(--button-height-xl) !important;
+    padding-left: 60px !important;
+    padding-right: 60px !important;
   }
 }
 
+// Botão apenas com ícone - padding adequado, não zero
 .btn--icon-only {
-  padding: 0 !important;
-  width: var(--button-height-md);
+  padding: 0 var(--spacing-3) !important;
+  width: auto !important;
+  min-width: 44px;
   border-radius: var(--border-radius-full) !important;
   
   &.btn--sm {
-    width: var(--button-height-sm);
+    min-width: 36px;
+    padding: 0 var(--spacing-2) !important;
   }
   
   &.btn--lg {
-    width: var(--button-height-lg);
+    min-width: 52px;
+    padding: 0 var(--spacing-4) !important;
   }
   
   &.btn--xl {
-    width: var(--button-height-xl);
+    min-width: 60px;
+    padding: 0 var(--spacing-5) !important;
   }
+}
+
+.btn--loading {
+  color: transparent !important;
+  
+  .btn__icon {
+    opacity: 0;
+  }
+  
+  .btn__label {
+    opacity: 0;
+  }
+}
+
+.btn__spinner {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  width: 100%;
+}
+
+.btn__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 // Variants
@@ -229,6 +274,13 @@ function handleClick(event: MouseEvent) {
     background: var(--color-bg-tertiary);
     color: var(--color-text-primary);
   }
+  
+  @media (hover: none) and (pointer: coarse) {
+    &:active:not(:disabled) {
+      background: var(--color-bg-tertiary);
+      color: var(--color-text-primary);
+    }
+  }
 }
 
 .btn--destructive {
@@ -247,40 +299,5 @@ function handleClick(event: MouseEvent) {
   &:hover:not(:disabled) {
     background: #1a9c3b;
   }
-}
-
-// Loading state
-.btn--loading {
-  color: transparent !important;
-  
-  .btn__icon {
-    opacity: 0;
-  }
-  
-  .btn__label {
-    opacity: 0;
-  }
-}
-
-.btn__spinner {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn__content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-2);
-  width: 100%;
-}
-
-.btn__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
 }
 </style>

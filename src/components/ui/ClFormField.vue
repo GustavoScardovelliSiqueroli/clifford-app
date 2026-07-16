@@ -24,6 +24,7 @@
           :aria-invalid="!!error"
           :aria-describedby="error ? errorId : hint ? hintId : undefined"
           :aria-required="required"
+          :inputmode="inputmode"
           @input="handleInput"
           @blur="handleBlur"
           @focus="handleFocus"
@@ -47,6 +48,7 @@
         :aria-invalid="!!error"
         :aria-describedby="error ? errorId : hint ? hintId : undefined"
         :aria-required="required"
+        :inputmode="inputmode"
         @input="handleInput"
         @blur="handleBlur"
         @focus="handleFocus"
@@ -80,7 +82,7 @@ import { QIcon } from 'quasar'
 interface Props {
   modelValue: string | number
   label?: string
-  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search'
+  type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search' | 'date'
   placeholder?: string
   disabled?: boolean
   readonly?: boolean
@@ -186,7 +188,7 @@ watch(() => props.disabled, (val) => {
   align-items: center;
   width: 100%;
   background: var(--color-white);
-  border: 1px solid var(--color-border-light);
+  border: 1px solid var(--color-border-medium);  // Borda mais visível
   border-radius: var(--border-radius-input);
   transition: border-color var(--transition-input), box-shadow var(--transition-input);
   
@@ -196,12 +198,12 @@ watch(() => props.disabled, (val) => {
   
   &.form-field--focused {
     border-color: var(--color-border-focus);
-    box-shadow: 0 0 0 3px rgba(var(--color-primary), 0.15);
+    box-shadow: 0 0 0 4px rgba(var(--color-primary), 0.2);  // Focus ring maior
   }
   
   &.form-field--error:not(.form-field--focused) {
     border-color: var(--color-negative);
-    box-shadow: 0 0 0 3px rgba(var(--color-negative), 0.15);
+    box-shadow: 0 0 0 4px rgba(var(--color-negative), 0.15);
   }
 }
 
@@ -216,16 +218,16 @@ watch(() => props.disabled, (val) => {
   padding: 0 var(--spacing-3);
   color: var(--color-text-tertiary);
   font-size: var(--font-size-body);
-  background: var(--color-bg-secondary);
+  background: var(--color-white);  // Mesmo background do input
   border-radius: var(--border-radius-input);
   
   &.form-field__affix--prepend {
-    border-right: 1px solid var(--color-border-light);
+    border-right: 1px solid var(--color-border-light);  // Separador sutil
     border-radius: var(--border-radius-input) 0 0 var(--border-radius-input);
   }
   
   &.form-field__affix--append {
-    border-left: 1px solid var(--color-border-light);
+    border-left: 1px solid var(--color-border-light);  // Separador sutil
     border-radius: 0 var(--border-radius-input) var(--border-radius-input) 0;
   }
 }
@@ -312,5 +314,10 @@ watch(() => props.disabled, (val) => {
 
 .form-field--focused .form-field__label {
   color: var(--color-primary);
+}
+
+// Error state on label
+.form-field--error .form-field__label {
+  color: var(--color-negative);
 }
 </style>

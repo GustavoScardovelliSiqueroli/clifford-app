@@ -1,94 +1,97 @@
 <template>
-  <q-dialog v-model="dialog" persistent class="dialog-no-overflow">
-    <q-card class="form-card">
-      <!-- Header -->
-      <q-card-section class="dialog-header">
-        <div class="row items-center justify-between">
-          <div>
-            <div class="dialog-title">{{ clienteNome }}</div>
-            <div class="text-caption text-grey-6">Competência: {{ competenciaFormatada }}</div>
-          </div>
-          <q-btn flat round dense icon="close" @click="fechar" aria-label="Fechar" />
+  <ClDialog
+    v-model="dialog"
+    title="Cobranças Extras"
+    :full-mobile="true"
+  >
+    <div class="dialog-content">
+      <!-- Header com nome do cliente e competência -->
+      <div class="dialog-header">
+        <div>
+          <h3 class="dialog-title">{{ clienteNome }}</h3>
+          <p class="dialog-subtitle">Competência: {{ competenciaFormatada }}</p>
         </div>
-      </q-card-section>
+      </div>
 
       <!-- Lista de extras existentes -->
-      <q-card-section class="q-px-lg q-pb-md">
-        <div v-if="extras.length === 0" class="text-center q-py-md text-grey-6">
-          Nenhum extra cadastrado
+      <div class="extras-list" v-if="extras.length > 0">
+        <div
+          v-for="extra in extras"
+          :key="extra.id as number"
+          class="extra-item"
+        >
+          <div class="extra-item__info">
+            <p class="extra-item__motivo">{{ extra.motivo }}</p>
+            <p class="extra-item__date">
+              {{ extra.created_at ? formatDate(extra.created_at) : 'Data não disponível' }}
+            </p>
+          </div>
+          <div class="extra-item__value">
+            {{ formatCurrency(extra.valor) }}
+          </div>
         </div>
-        <q-list dense separator v-else>
-          <q-item v-for="extra in extras" :key="extra.id as number" class="q-py-xs">
-            <q-item-section>
-              <div class="text-body1">{{ extra.motivo }}</div>
-              <div class="text-caption text-grey-6">
-                {{ extra.created_at ? formatDate(extra.created_at) : 'Data não disponível' }}
-              </div>
-            </q-item-section>
-            <q-item-section side top>
-              <div class="text-h6 text-primary">{{ formatCurrency(extra.valor) }}</div>
-            </q-item-section>
-          </q-item>
-        </q-list>
 
         <!-- Total extras -->
-        <div class="row justify-end q-gutter-sm q-mt-md bg-grey-1 q-pa-sm rounded-borders">
-          <div class="text-subtitle1">Total extras:</div>
-          <div class="text-h6 text-primary">{{ formatCurrency(totalExtras) }}</div>
+        <div class="extras-total">
+          <span class="extras-total__label">Total extras:</span>
+          <span class="extras-total__value">{{ formatCurrency(totalExtras) }}</span>
         </div>
-      </q-card-section>
+      </div>
 
-      <q-separator />
+      <div v-else class="extras-empty">
+        Nenhum extra cadastrado
+      </div>
+
+      <div class="divider" />
 
       <!-- Formulário novo extra -->
-      <q-card-section class="q-px-lg q-pb-md">
-        <q-form @submit.prevent="salvarExtra">
-          <div class="column q-gutter-md">
-            <q-input
-              v-model="novoExtra.motivo"
-              label="Motivo"
-              placeholder="Ex: Tela nova, Tintas extras, Material complementar"
-              :rules="[(val) => !!val?.trim() || 'Motivo é obrigatório']"
-              outlined
-              dense
-              hide-bottom-space
-              @update:model-value="erros.motivo = ''"
-            />
+      <form @submit.prevent="salvarExtra" class="extra-form">
+        <ClFormField
+          v-model="novoExtra.motivo"
+          label="Motivo"
+          placeholder="Ex: Tela nova, Tintas extras, Material complementar"
+          :error="erros.motivo"
+          @update:model-value="erros.motivo = ''"
+          required
+        />
 
-            <q-input
-              v-model="novoExtra.valor"
-              label="Valor (R$)"
-              placeholder="0,00"
-              :rules="[(val) => (val !== null && val !== '' && Number(val) > 0) || 'Valor deve ser maior que zero']"
-              outlined
-              dense
-              hide-bottom-space
-              prefix="R$ "
-              type="number"
-              @update:model-value="erros.valor = ''"
-            />
-          </div>
+        <ClMoneyField
+          v-model="novoExtra.valor"
+          label="Valor"
+          placeholder="0,00"
+          :min="0.01"
+          :max="999999.99"
+          :step="0.01"
+          :error="erros.valor"
+          @update:model-value="erros.valor = ''"
+          required
+        />
 
-          <div class="row justify-end q-mt-md">
-            <q-btn flat label="Cancelar" color="grey-6" v-close-popup />
-            <q-btn
-              unelevated
-              label="Adicionar"
-              color="primary"
-              type="submit"
-              :loading="salvando"
-            />
-          </div>
-        </q-form>
-      </q-card-section>
-    </q-card>
-  </q-dialog>
+        <div class="form-actions">
+          <ClButton variant="ghost" @click="fechar" label="Cancelar" />
+          <ClButton
+            variant="primary"
+            label="Adicionar"
+            type="submit"
+            :loading="salvando"
+            size="lg"
+          />
+        </div>
+      </form>
+    </div>
+  </ClDialog>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useCobrancaStore } from 'src/stores/cobranca-store';
 import type { CobrancaExtra } from 'src/database/repositories/cobranca-repository';
+import {
+  ClDialog,
+  ClFormField,
+  ClMoneyField,
+  ClButton,
+} from 'src/components/ui';
 
 interface Props {
   modelValue: boolean;
@@ -161,6 +164,8 @@ const carregar = async () => {
 
 const salvarExtra = async () => {
   if (!novoExtra.value.motivo?.trim() || !novoExtra.value.valor || Number(novoExtra.value.valor) <= 0) {
+    if (!novoExtra.value.motivo?.trim()) erros.value.motivo = 'Motivo é obrigatório';
+    if (!novoExtra.value.valor || Number(novoExtra.value.valor) <= 0) erros.value.valor = 'Valor deve ser maior que zero';
     return;
   }
   salvando.value = true;
@@ -195,25 +200,123 @@ watch(
 </script>
 
 <style scoped lang="scss">
-.form-card {
-  width: 100%;
-  max-width: 500px;
-  border-radius: 20px !important;
-  overflow: hidden;
+.dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  max-height: 70vh;
+  overflow-y: auto;
 }
 
 .dialog-header {
-  padding: 20px 24px 16px;
-  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: var(--spacing-3);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .dialog-title {
-  font-size: 17px;
-  font-weight: 700;
-  color: #1a1a1a;
+  margin: 0 0 var(--spacing-1);
+  font-size: var(--font-size-title);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
 }
 
-:deep(.dialog-no-overflow .q-dialog__inner) {
-  border-radius: 20px;
+.dialog-subtitle {
+  margin: 0;
+  font-size: var(--font-size-caption-md);
+  color: var(--color-text-tertiary);
+}
+
+.extras-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.extra-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-3);
+  background: var(--color-bg-secondary);
+  border-radius: var(--border-radius-md);
+}
+
+.extra-item__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.extra-item__motivo {
+  margin: 0 0 var(--spacing-1);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-normal);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.extra-item__date {
+  margin: 0;
+  font-size: var(--font-size-caption-md);
+  color: var(--color-text-tertiary);
+  line-height: var(--line-height-normal);
+}
+
+.extra-item__value {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  white-space: nowrap;
+  margin-left: var(--spacing-3);
+}
+
+.extras-total {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3);
+  background: var(--color-bg-tertiary);
+  border-radius: var(--border-radius-md);
+  margin-top: var(--spacing-2);
+}
+
+.extras-total__label {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+
+.extras-total__value {
+  font-size: var(--font-size-h6);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+.extras-empty {
+  text-align: center;
+  padding: var(--spacing-6);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-body-sm);
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid var(--color-border-light);
+  margin: var(--spacing-2) 0;
+}
+
+.extra-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-2);
 }
 </style>

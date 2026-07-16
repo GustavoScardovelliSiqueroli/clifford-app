@@ -23,20 +23,16 @@
               </div>
               
               <div class="config-item__control">
-                <ClFormField
+                <ClMoneyField
                   v-model="form.valor_mensalidade"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  prepend="R$ "
+                  label="Valor da mensalidade"
+                  placeholder="0,00"
+                  :min="0"
+                  :max="999999.99"
+                  :step="0.01"
                   :error="erros.valor_mensalidade"
                   @update:model-value="erros.valor_mensalidade = ''"
-                  class="config-input"
-                >
-                  <template #append>
-                    <q-icon name="currency_real" size="16px" color="grey-5" />
-                  </template>
-                </ClFormField>
+                />
               </div>
             </div>
 
@@ -56,16 +52,18 @@
               <div class="config-item__control">
                 <ClFormField
                   v-model="form.dia_vencimento"
+                  label="Dia de vencimento"
+                  placeholder="Ex: 5"
                   type="number"
-                  step="1"
-                  min="1"
-                  max="31"
+                  :min="1"
+                  :max="31"
+                  :step="1"
                   :error="erros.dia_vencimento"
                   @update:model-value="erros.dia_vencimento = ''"
-                  class="config-input"
+                  inputmode="numeric"
                 >
-                  <template #append>
-                    <q-icon name="event" size="16px" color="grey-5" />
+                  <template #prepend>
+                    <q-icon name="calendar_today" size="18px" color="grey-5" />
                   </template>
                 </ClFormField>
               </div>
@@ -80,6 +78,7 @@
             class="btn-save"
             :loading="saving"
             @click="salvar"
+            size="lg"
           />
         </div>
 
@@ -95,7 +94,7 @@
               </div>
               <ClButton
                 variant="destructive"
-                size="sm"
+                size="md"
                 label="RESETAR BANCO DE DADOS"
                 @click="confirmarReset"
               />
@@ -137,6 +136,7 @@ import {
   ClDialog,
   ClLoadingState,
   ClFormField,
+  ClMoneyField,
 } from 'src/components/ui';
 
 const store = useConfigStore();
@@ -297,19 +297,11 @@ async function resetDb() {
 
 .config-item__control {
   flex-shrink: 0;
-  min-width: 120px;
+  min-width: 160px;
   
   @media (max-width: 599px) {
     width: 100%;
     min-width: 0;
-  }
-}
-
-.config-input {
-  width: 120px;
-  
-  @media (max-width: 599px) {
-    width: 100%;
   }
 }
 

@@ -34,8 +34,9 @@ $color-text-inverse: #ffffff;
 $color-text-disabled: #bdbdbd;
 $color-text-link: #fbac25;
 
-$color-border-light: #ebebeb;
-$color-border-medium: #e0e0e0;
+// Borda mais visível para inputs
+$color-border-light: #d0d0d0;
+$color-border-medium: #bdbdbd;
 $color-border-focus: #fbac25;
 
 // Quasar Color Overrides
@@ -120,15 +121,15 @@ $transition-duration-normal: 200ms;
 $transition-duration-slow: 300ms;
 $transition-timing-ease: ease;
 
-// Form
-$field-padding: 0 12px;
-$field-height: 44px;
+// Form - altura aumentada para touch target 48px
+$field-padding: 0 16px;
+$field-height: 48px;
 $field-border-radius: 12px;
 $field-label-font-size: 12px;
 $field-label-color: #616161;
 
-// Button
-$btn-height: 40px;
+// Button - altura mínima 44px (Material Design touch target)
+$btn-height: 44px;
 $btn-padding: 0 16px;
 $btn-border-radius: 12px;
 $btn-font-size: 14px;
@@ -171,14 +172,14 @@ $toolbar-height: 56px;
 $toolbar-padding: 0 16px;
 
 // Input
-$input-height: 44px;
-$input-padding: 0 12px;
+$input-height: 48px;
+$input-padding: 0 16px;
 $input-border-radius: 12px;
 $input-font-size: 14px;
 
 // Select
-$select-height: 44px;
-$select-padding: 0 12px;
+$select-height: 48px;
+$select-padding: 0 16px;
 
 // Toggle
 $toggle-size: 44px;
@@ -191,7 +192,7 @@ $checkbox-size: 20px;
 $radio-size: 20px;
 
 // Separator
-$separator-color: #ebebeb;
+$separator-color: #d0d0d0;
 
 // Loader/Spinner
 $spinner-color: $primary;

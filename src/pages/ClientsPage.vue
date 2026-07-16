@@ -56,14 +56,14 @@
               <div class="client-card__actions">
                 <ClButton
                   variant="ghost"
-                  size="sm"
+                  size="md"
                   icon="edit"
                   @click="abrirDialogEditar(cliente)"
                   aria-label="Editar cliente"
                 />
                 <ClButton
                   variant="ghost"
-                  size="sm"
+                  size="md"
                   icon="delete_outline"
                   class="btn-delete"
                   @click="confirmarExclusao(cliente)"
@@ -83,7 +83,7 @@
       :full-mobile="true"
       show-footer="auto"
     >
-      <form @submit.prevent="salvar" class="client-form">
+      <form @submit.prevent="salvar" class="client-form" id="client-form">
         <div class="form-section">
           <ClFormField
             v-model="form.nome"
@@ -102,41 +102,19 @@
             prependIcon="phone"
           />
 
-          <ClFormField
-            v-model="dataNascimentoFormatada"
+          <ClDateField
+            v-model="form.birth_date"
             label="Data de nascimento"
-            type="text"
-            readonly
-            prependIcon="event"
-          >
-            <template #append>
-              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                <q-date v-model="form.birth_date" mask="YYYY-MM-DD">
-                  <div class="row items-center justify-end">
-                    <q-btn v-close-popup label="OK" color="primary" flat />
-                  </div>
-                </q-date>
-              </q-popup-proxy>
-            </template>
-          </ClFormField>
+            placeholder="DD/MM/AAAA"
+            :max="hojeISO"
+          />
 
-          <ClFormField
-            v-model="dataRegistroFormatada"
+          <ClDateField
+            v-model="form.created_at"
             label="Data de registro"
-            type="text"
-            readonly
-            prependIcon="event"
-          >
-            <template #append>
-              <q-popup-proxy cover transition-show="scale" transition-hide="scale">
-                <q-date v-model="form.created_at" mask="YYYY-MM-DD">
-                  <div class="row items-center justify-end">
-                    <q-btn v-close-popup label="OK" color="primary" flat />
-                  </div>
-                </q-date>
-              </q-popup-proxy>
-            </template>
-          </ClFormField>
+            placeholder="DD/MM/AAAA"
+            :max="hojeISO"
+          />
 
           <ClFormTextarea
             v-model="form.obs"
@@ -152,30 +130,30 @@
             <p class="mensalidade-config__subtitle">Deixe em branco para usar os valores globais</p>
           </div>
 
-          <ClFormField
+          <ClMoneyField
             v-model="form.mensalidade_valor"
-            label="Valor da mensalidade (R$)"
-            placeholder="Ex: 150.00"
-            type="text"
-            prepend="R$ "
+            label="Valor da mensalidade"
+            placeholder="0,00"
+            :min="0"
+            :max="999999.99"
+            :step="0.01"
             :error="erros.mensalidade_valor"
             @update:model-value="erros.mensalidade_valor = ''"
-          >
-            <template #append>
-              <q-icon name="currency_real" size="16px" color="grey-5" />
-            </template>
-          </ClFormField>
+          />
 
           <ClFormField
             v-model="form.mensalidade_dia_vencimento"
             label="Dia de vencimento"
             placeholder="Ex: 5"
-            type="text"
+            type="number"
+            :min="1"
+            :max="31"
             :error="erros.mensalidade_dia_vencimento"
             @update:model-value="erros.mensalidade_dia_vencimento = ''"
+            inputmode="numeric"
           >
-            <template #append>
-              <q-icon name="event" size="16px" color="grey-5" />
+            <template #prepend>
+              <q-icon name="calendar_today" size="18px" color="grey-5" />
             </template>
           </ClFormField>
 
@@ -198,6 +176,7 @@
             type="submit"
             form="client-form"
             :loading="salvando"
+            size="lg"
           />
         </div>
       </template>
@@ -236,6 +215,8 @@ import {
   ClBadge,
   ClFormField,
   ClFormTextarea,
+  ClDateField,
+  ClMoneyField,
 } from 'src/components/ui';
 
 const store = useClientesStore();
@@ -262,19 +243,12 @@ const form = ref({
   created_at: date.formatDate(new Date(), 'YYYY-MM-DD'),
   obs: '',
   ativo: true,
-  mensalidade_valor: '',
+  mensalidade_valor: 0,
   mensalidade_dia_vencimento: '',
 });
 const erros = ref({ nome: '', mensalidade_valor: '', mensalidade_dia_vencimento: '' });
 
-const dataRegistroFormatada = computed(() => formatCustomDate(form.value.created_at));
-const dataNascimentoFormatada = computed(() => formatCustomDate(form.value.birth_date));
-
-function formatCustomDate(dateStr: string | null | undefined) {
-  if (!dateStr) return '';
-  const [year, month, day] = dateStr.split('-');
-  return `${day}/${month}/${year}`;
-}
+const hojeISO = date.formatDate(new Date(), 'YYYY-MM-DD');
 
 function abrirDialogNovo() {
   editando.value = false;
@@ -285,7 +259,7 @@ function abrirDialogNovo() {
     created_at: date.formatDate(new Date(), 'YYYY-MM-DD'),
     obs: '',
     ativo: true,
-    mensalidade_valor: '',
+    mensalidade_valor: 0,
     mensalidade_dia_vencimento: '',
   };
   erros.value = { nome: '', mensalidade_valor: '', mensalidade_dia_vencimento: '' };
@@ -303,7 +277,7 @@ function abrirDialogEditar(cliente: Cliente) {
     obs: cliente.obs ?? '',
     ativo: cliente.ativo === 1,
     mensalidade_valor:
-      cliente.mensalidade_config?.valor != null ? String(cliente.mensalidade_config.valor) : '',
+      cliente.mensalidade_config?.valor != null ? Number(cliente.mensalidade_config.valor) : 0,
     mensalidade_dia_vencimento:
       cliente.mensalidade_config?.dia_vencimento != null
         ? String(cliente.mensalidade_config.dia_vencimento)
@@ -319,7 +293,7 @@ async function salvar() {
     return;
   }
 
-  if (form.value.mensalidade_valor !== '') {
+  if (form.value.mensalidade_valor !== 0 && form.value.mensalidade_valor !== null) {
     const valor = Number(form.value.mensalidade_valor);
     if (isNaN(valor) || valor <= 0) {
       erros.value.mensalidade_valor = 'Valor inválido';
@@ -345,11 +319,11 @@ async function salvar() {
       created_at: form.value.created_at || '',
     };
 
-    if (form.value.mensalidade_valor !== '' || form.value.mensalidade_dia_vencimento !== '') {
+    if (form.value.mensalidade_valor !== 0 || form.value.mensalidade_dia_vencimento !== '') {
       payload.mensalidade_config = {
         cliente_id: 0,
         valor:
-          form.value.mensalidade_valor !== '' ? Number(form.value.mensalidade_valor) : undefined,
+          form.value.mensalidade_valor !== 0 ? Number(form.value.mensalidade_valor) : undefined,
         dia_vencimento:
           form.value.mensalidade_dia_vencimento !== ''
             ? Number(form.value.mensalidade_dia_vencimento)

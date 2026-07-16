@@ -9,7 +9,7 @@
         <div class="competence-nav">
           <ClButton
             variant="ghost"
-            size="sm"
+            size="md"
             icon="keyboard_arrow_left"
             @click="competenciaAnterior"
             aria-label="Competência anterior"
@@ -17,7 +17,7 @@
           <span class="competence-nav__label">{{ competenciaFormatada }}</span>
           <ClButton
             variant="ghost"
-            size="sm"
+            size="md"
             icon="keyboard_arrow_right"
             @click="competenciaProxima"
             aria-label="Próxima competência"
@@ -94,7 +94,7 @@
               <ClButton
                 v-if="cobranca.pendente"
                 variant="success"
-                size="sm"
+                size="md"
                 label="Dar Baixa"
                 @click.stop="baixarCobranca(cobranca.id as number)"
               />
