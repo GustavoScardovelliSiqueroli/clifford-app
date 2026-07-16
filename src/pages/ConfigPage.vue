@@ -1,9 +1,6 @@
 <template>
   <q-page class="page">
-    <ClPageHeader
-      title="Configurações"
-      subtitle="Ajuste os parâmetros do sistema"
-    />
+    <ClPageHeader title="Configurações" subtitle="Ajuste os parâmetros do sistema" />
 
     <div class="page-content">
       <ClLoadingState v-if="store.loading" label="Carregando configurações..." />
@@ -16,12 +13,12 @@
               <div class="config-item__icon">
                 <q-icon name="attach_money" size="24px" color="primary" />
               </div>
-              
+
               <div class="config-item__info">
                 <h3 class="config-item__title">Valor da Mensalidade</h3>
                 <p class="config-item__description">Define o valor cobrado por cliente</p>
               </div>
-              
+
               <div class="config-item__control">
                 <ClMoneyField
                   v-model="form.valor_mensalidade"
@@ -43,12 +40,12 @@
               <div class="config-item__icon">
                 <q-icon name="calendar_today" size="24px" color="primary" />
               </div>
-              
+
               <div class="config-item__info">
                 <h3 class="config-item__title">Dia de Vencimento</h3>
                 <p class="config-item__description">Dia do mês em que as mensalidades vencem</p>
               </div>
-              
+
               <div class="config-item__control">
                 <ClFormField
                   v-model="form.dia_vencimento"
@@ -103,19 +100,22 @@
         </div>
 
         <!-- Confirm Reset Dialog -->
-        <ClDialog
-          v-model="dialogReset"
-          title="Confirmar Reset"
-        >
+        <ClDialog v-model="dialogReset" title="Confirmar Reset" show-footer="auto">
           <p class="dialog-message">
-            <strong>ATENÇÃO:</strong> Esta ação apagará <strong>TODOS</strong> os dados (clientes, cobranças, configurações) e não poderá ser desfeita.
+            <strong>ATENÇÃO:</strong> Esta ação apagará <strong>TODOS</strong> os dados (clientes,
+            cobranças, configurações) e não poderá ser desfeita.
           </p>
           <p class="dialog-message">Tem certeza que deseja continuar?</p>
-          
+
           <template #footer>
             <div class="dialog-footer">
-              <ClButton variant="ghost" @click="dialogReset = false">Cancelar</ClButton>
-              <ClButton variant="destructive" label="RESETAR AGORA" :loading="resetando" @click="resetDb" />
+              <ClButton variant="ghost" @click="dialogReset = false" label="Cancelar"></ClButton>
+              <ClButton
+                variant="destructive"
+                label="RESETAR AGORA"
+                :loading="resetando"
+                @click="resetDb"
+              />
             </div>
           </template>
         </ClDialog>
@@ -215,10 +215,10 @@ async function resetDb() {
   await saveDB();
   await runMigrations();
   await saveDB();
-  
+
   dialogReset.value = false;
   resetando.value = false;
-  
+
   // Recarregar a página para refletir as mudanças
   window.location.reload();
 }
@@ -234,7 +234,7 @@ async function resetDb() {
 .page-content {
   padding: var(--spacing-4) var(--spacing-6);
   padding-bottom: calc(var(--spacing-4) + var(--tab-bar-height) + env(safe-area-inset-bottom));
-  
+
   @media (min-width: #{$breakpoint-md}) {
     padding: var(--spacing-6) var(--spacing-8);
     padding-bottom: calc(var(--spacing-6) + var(--tab-bar-height));
@@ -255,7 +255,7 @@ async function resetDb() {
   align-items: center;
   gap: var(--spacing-4);
   padding: var(--spacing-4) 0;
-  
+
   @media (max-width: 599px) {
     flex-direction: column;
     align-items: flex-start;
@@ -298,7 +298,7 @@ async function resetDb() {
 .config-item__control {
   flex-shrink: 0;
   min-width: 160px;
-  
+
   @media (max-width: 599px) {
     width: 100%;
     min-width: 0;
@@ -340,7 +340,7 @@ async function resetDb() {
   justify-content: space-between;
   padding: var(--spacing-6);
   gap: var(--spacing-4);
-  
+
   @media (max-width: 599px) {
     flex-direction: column;
     align-items: flex-start;
@@ -376,7 +376,7 @@ async function resetDb() {
   font-size: var(--font-size-body);
   color: var(--color-text-secondary);
   line-height: var(--line-height-normal);
-  
+
   &:last-child {
     margin-bottom: 0;
   }

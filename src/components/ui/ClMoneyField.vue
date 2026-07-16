@@ -1,7 +1,7 @@
 <template>
   <ClFormField
     v-bind="formFieldProps"
-    :model-value="formattedValue"
+    :model-value="displayValue"
     @update:model-value="onInput"
     @blur="onBlur"
     @focus="onFocus"
@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import ClFormField from './ClFormField.vue'
 
 interface Props {
@@ -61,6 +61,11 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emits>()
 
+// Estado interno para controlar se está focado/digitando
+const isFocused = ref(false)
+// Valor bruto digitado pelo usuário (sem formatação)
+const rawInputValue = ref<string>('')
+
 const formFieldProps = computed(() => ({
   type: 'text' as const,
   inputmode: 'decimal' as const,
@@ -77,15 +82,21 @@ const formFieldProps = computed(() => ({
   append: props.append,
 }))
 
-const formattedValue = computed({
+// Valor exibido: raw enquanto focado, formatado quando não focado
+const displayValue = computed({
   get() {
+    // Se está focado, mostra raw (mesmo se vazio, para não mostrar "R$ 0,00")
+    if (isFocused.value) {
+      return rawInputValue.value
+    }
+    // Senão mostra formatado (ou vazio)
     if (props.modelValue === null || props.modelValue === undefined) {
       return ''
     }
     return formatNumber(props.modelValue)
   },
   set() {
-    // Não usado diretamente, onInput faz o parsing
+    // Não usado diretamente
   },
 })
 
@@ -120,7 +131,7 @@ function parseNumber(formatted: string): number | null {
     const parts = cleaned.split('.')
     if (parts.length > 1) {
       const lastPart = parts[parts.length - 1]
-      if (lastPart && lastPart.length === 3) {
+      if (lastPart && lastPart.length === 3 && parts.length > 1) {
         cleaned = cleaned.replace(/\./g, '')
       }
     }
@@ -136,17 +147,39 @@ function parseNumber(formatted: string): number | null {
 }
 
 function onInput(value: string | number) {
-  const parsed = parseNumber(String(value))
+  const strValue = String(value)
+  rawInputValue.value = strValue
+  isFocused.value = true
+  
+  // Parse e emite o número para o parent
+  const parsed = parseNumber(strValue)
   emit('update:modelValue', parsed)
 }
 
 function onBlur(event: FocusEvent) {
+  // Ao perder foco, limpa o raw value e emite blur
+  isFocused.value = false
+  rawInputValue.value = ''
   emit('blur', event)
 }
 
 function onFocus(event: FocusEvent) {
+  isFocused.value = true
+  
+  // Se o valor é 0, null ou undefined, limpa o raw input para facilitar digitação
+  if (props.modelValue === 0 || props.modelValue === null || props.modelValue === undefined) {
+    rawInputValue.value = ''
+  }
+  
   emit('focus', event)
 }
+
+// Observar mudanças no modelValue vindo de fora (ex: reset do formulário)
+watch(() => props.modelValue, (newVal: number | null | undefined) => {
+  if (newVal === 0 || newVal === null || newVal === undefined) {
+    rawInputValue.value = ''
+  }
+})
 </script>
 
 <style scoped lang="scss">
