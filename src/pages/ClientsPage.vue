@@ -29,8 +29,8 @@
           :description="busca ? 'Tente outro termo' : 'Toque em Novo para adicionar'"
         />
 
-        <div v-else class="clients-list" role="list" aria-label="Lista de clientes">
-          <transition-group name="list" tag="div">
+        <div v-else role="list" aria-label="Lista de clientes">
+          <transition-group name="list" tag="div" class="clients-list">
             <div
               v-for="cliente in clientesFiltrados"
               :key="cliente.id"
@@ -87,7 +87,7 @@
         <div class="form-section">
           <ClFormField
             v-model="form.nome"
-            label="Nome *"
+            label="Nome"
             placeholder="Nome do cliente"
             :error="erros.nome"
             :required="true"
@@ -124,47 +124,45 @@
           />
         </div>
 
-        <ClPageCard variant="borderless" class="mensalidade-config" :padded="false">
-          <div class="mensalidade-config__header">
-            <h4 class="mensalidade-config__title">Configuração de Mensalidade</h4>
-            <p class="mensalidade-config__subtitle">Deixe em branco para usar os valores globais</p>
+        <div class="mensalidade-config__header">
+          <h4 class="mensalidade-config__title">Configuração de Mensalidade</h4>
+          <p class="mensalidade-config__subtitle">Deixe em branco para usar os valores globais</p>
+        </div>
+
+        <ClMoneyField
+          v-model="form.mensalidade_valor"
+          label="Valor da mensalidade"
+          placeholder="0,00"
+          :min="0"
+          :max="999999.99"
+          :step="0.01"
+          :error="erros.mensalidade_valor"
+          @update:model-value="erros.mensalidade_valor = ''"
+        />
+
+        <ClFormField
+          v-model="form.mensalidade_dia_vencimento"
+          label="Dia de vencimento"
+          placeholder="Ex: 5"
+          type="number"
+          :min="1"
+          :max="31"
+          :error="erros.mensalidade_dia_vencimento"
+          @update:model-value="erros.mensalidade_dia_vencimento = ''"
+          inputmode="numeric"
+        >
+          <template #prepend>
+            <q-icon name="calendar_today" size="18px" color="grey-5" />
+          </template>
+        </ClFormField>
+
+        <div class="mensalidade-config__toggle">
+          <div>
+            <p class="mensalidade-config__toggle-label">Cliente ativo</p>
+            <p class="mensalidade-config__toggle-hint">Desative para não gerar cobrança</p>
           </div>
-
-          <ClMoneyField
-            v-model="form.mensalidade_valor"
-            label="Valor da mensalidade"
-            placeholder="0,00"
-            :min="0"
-            :max="999999.99"
-            :step="0.01"
-            :error="erros.mensalidade_valor"
-            @update:model-value="erros.mensalidade_valor = ''"
-          />
-
-          <ClFormField
-            v-model="form.mensalidade_dia_vencimento"
-            label="Dia de vencimento"
-            placeholder="Ex: 5"
-            type="number"
-            :min="1"
-            :max="31"
-            :error="erros.mensalidade_dia_vencimento"
-            @update:model-value="erros.mensalidade_dia_vencimento = ''"
-            inputmode="numeric"
-          >
-            <template #prepend>
-              <q-icon name="calendar_today" size="18px" color="grey-5" />
-            </template>
-          </ClFormField>
-
-          <div class="mensalidade-config__toggle">
-            <div>
-              <p class="mensalidade-config__toggle-label">Cliente ativo</p>
-              <p class="mensalidade-config__toggle-hint">Desative para não gerar cobrança</p>
-            </div>
-            <q-toggle v-model="form.ativo" color="primary" keep-color />
-          </div>
-        </ClPageCard>
+          <q-toggle v-model="form.ativo" color="primary" keep-color />
+        </div>
       </form>
 
       <template #footer>
@@ -206,7 +204,6 @@ import type { Cliente } from 'src/database/repositories/cliente-repository';
 import { date } from 'quasar';
 import {
   ClPageHeader,
-  ClPageCard,
   ClButton,
   ClDialog,
   ClEmptyState,
@@ -522,6 +519,9 @@ onMounted(() => void store.carregar());
 
 .mensalidade-config__header {
   margin: 0 0 var(--spacing-4);
+  border-top: 1px solid var(--color-border-light);
+  padding-top: var(--spacing-2);
+  margin-top: var(--spacing-2);
 }
 
 .mensalidade-config__title {
