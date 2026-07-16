@@ -80,7 +80,6 @@
     <ClDialog
       v-model="dialog"
       :title="editando ? 'Editar cliente' : 'Novo cliente'"
-      :full-mobile="true"
       show-footer="auto"
     >
       <form @submit.prevent="salvar" class="client-form" id="client-form">
