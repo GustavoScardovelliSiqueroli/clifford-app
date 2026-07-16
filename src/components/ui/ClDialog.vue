@@ -3,9 +3,11 @@
     v-model="modelValue"
     :persistent="persistent"
     :maximized="maximized"
+    :content-class="fullMobile ? 'modal--full-mobile' : undefined"
+    :class="fullMobile ? 'modal--full-mobile' : undefined"
   >
     <div class="modal" :class="[fullMobile && 'modal--full-mobile']">
-      <header v-if="showHeader && ($slots.header || title)" class="modal__header">
+      <div v-if="showHeader && ($slots.header || title)" class="modal__header">
         <slot name="header">
           <h2 class="modal__title" :id="titleId">{{ title }}</h2>
         </slot>
@@ -18,51 +20,59 @@
           @click="close"
           class="modal__close"
         />
-      </header>
-      
-      <main class="modal__content">
+      </div>
+
+      <div class="modal__content">
         <slot></slot>
-      </main>
-      
-      <footer v-if="showFooter && $slots.footer" class="modal__footer">
+      </div>
+
+      <div v-if="shouldShowFooter" class="modal__footer">
         <slot name="footer"></slot>
-      </footer>
+      </div>
     </div>
   </q-dialog>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { QDialog, QBtn } from 'quasar'
+import { computed, useSlots } from 'vue';
+import { QDialog, QBtn } from 'quasar';
 
 interface Props {
-  modelValue: boolean
-  title?: string
-  persistent?: boolean
-  maximized?: boolean
-  fullMobile?: boolean
-  showHeader?: boolean
-  showFooter?: boolean
+  modelValue: boolean;
+  title?: string;
+  persistent?: boolean;
+  maximized?: boolean;
+  fullMobile?: boolean;
+  showHeader?: boolean;
+  showFooter?: boolean | 'auto';
 }
 
 interface Emits {
-  (e: 'update:modelValue', value: boolean): void
-  (e: 'close'): void
+  (e: 'update:modelValue', value: boolean): void;
+  (e: 'close'): void;
 }
 
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
+const props = defineProps<Props>();
+const emit = defineEmits<Emits>();
+const slots = useSlots();
 
-const titleId = `modal-title-${Math.random().toString(36).substr(2, 9)}`
+const titleId = `modal-title-${Math.random().toString(36).substr(2, 9)}`;
 
 const modelValue = computed({
   get: () => props.modelValue,
   set: (value) => emit('update:modelValue', value),
-})
+});
+
+const shouldShowFooter = computed(() => {
+  if (props.showFooter === 'auto' || props.showFooter === undefined) {
+    return !!slots.footer;
+  }
+  return props.showFooter;
+});
 
 function close() {
-  emit('update:modelValue', false)
-  emit('close')
+  emit('update:modelValue', false);
+  emit('close');
 }
 </script>
 
@@ -76,15 +86,13 @@ function close() {
   display: flex;
   flex-direction: column;
   max-height: 90vh;
-  
+
   &.modal--full-mobile {
     @media (max-width: #{$breakpoint-sm - 1px}) {
       max-width: 100vw;
       width: 100vw;
       border-radius: 0;
       margin: 0;
-      max-height: 100vh;
-      height: 100vh;
     }
   }
 }
@@ -119,12 +127,12 @@ function close() {
   cursor: pointer;
   transition: all var(--transition-fast);
   flex-shrink: 0;
-  
+
   &:hover {
     background: var(--color-bg-tertiary);
     color: var(--color-text-primary);
   }
-  
+
   &:active {
     transform: scale(0.95);
   }
@@ -143,7 +151,7 @@ function close() {
   gap: var(--spacing-3);
   padding: var(--spacing-4) var(--spacing-6);
   border-top: 1px solid var(--color-border-light);
-  background: var(--color-bg-secondary);
+  background: var(--color-bg-tertiary);
   flex-shrink: 0;
 }
 
@@ -151,12 +159,20 @@ function close() {
   overflow-x: hidden !important;
   max-width: 100vw;
   border-radius: var(--dialog-border-radius);
-  padding: var(--spacing-4);
-  
+  padding: 0 var(--spacing-4);
+
   @media (max-width: #{$breakpoint-sm - 1px}) {
     padding: 0;
     border-radius: 0;
-    max-height: 100vh;
+  }
+
+  &.modal--full-mobile {
+    @media (max-width: #{$breakpoint-sm - 1px}) {
+      height: 100vh;
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+    }
   }
 }
 

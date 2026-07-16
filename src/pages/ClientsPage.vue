@@ -1,17 +1,8 @@
 <template>
   <q-page class="page">
-    <ClPageHeader
-      title="Clientes"
-      :subtitle="`${store.clientes.length} cadastrados`"
-    >
+    <ClPageHeader title="Clientes" :subtitle="`${store.clientes.length} cadastrados`">
       <template #actions>
-        <ClButton
-          variant="primary"
-          size="md"
-          icon="add"
-          label="Novo"
-          @click="abrirDialogNovo"
-        />
+        <ClButton variant="primary" size="md" icon="add" label="Novo" @click="abrirDialogNovo" />
       </template>
     </ClPageHeader>
 
@@ -47,31 +38,21 @@
               role="listitem"
             >
               <div class="client-card__main">
-                <ClAvatar
-                  :name="cliente.nome"
-                  size="md"
-                  shape="circle"
-                />
-                
+                <ClAvatar :name="cliente.nome" size="md" shape="circle" />
+
                 <div class="client-card__info">
                   <div class="client-card__name-row">
                     <h3 class="client-card__name">{{ cliente.nome }}</h3>
-                    <ClBadge
-                      v-if="!cliente.ativo"
-                      variant="secondary"
-                      size="sm"
-                    >
-                      Inativo
-                    </ClBadge>
+                    <ClBadge v-if="!cliente.ativo" variant="secondary" size="sm"> Inativo </ClBadge>
                   </div>
-                  
+
                   <p class="client-card__phone">
                     <q-icon name="phone" size="12px" class="q-mr-xs" />
                     {{ cliente.telefone || 'Sem telefone' }}
                   </p>
                 </div>
               </div>
-              
+
               <div class="client-card__actions">
                 <ClButton
                   variant="ghost"
@@ -100,6 +81,7 @@
       v-model="dialog"
       :title="editando ? 'Editar cliente' : 'Novo cliente'"
       :full-mobile="true"
+      show-footer="auto"
     >
       <form @submit.prevent="salvar" class="client-form">
         <div class="form-section">
@@ -111,7 +93,7 @@
             :required="true"
             autofocus
           />
-          
+
           <ClFormField
             v-model="form.telefone"
             label="Telefone"
@@ -119,7 +101,7 @@
             type="tel"
             prependIcon="phone"
           />
-          
+
           <ClFormField
             v-model="dataNascimentoFormatada"
             label="Data de nascimento"
@@ -137,7 +119,7 @@
               </q-popup-proxy>
             </template>
           </ClFormField>
-          
+
           <ClFormField
             v-model="dataRegistroFormatada"
             label="Data de registro"
@@ -155,7 +137,7 @@
               </q-popup-proxy>
             </template>
           </ClFormField>
-          
+
           <ClFormTextarea
             v-model="form.obs"
             label="Observações"
@@ -163,13 +145,13 @@
             :rows="3"
           />
         </div>
-        
+
         <ClPageCard variant="borderless" class="mensalidade-config" :padded="false">
           <div class="mensalidade-config__header">
             <h4 class="mensalidade-config__title">Configuração de Mensalidade</h4>
             <p class="mensalidade-config__subtitle">Deixe em branco para usar os valores globais</p>
           </div>
-          
+
           <ClFormField
             v-model="form.mensalidade_valor"
             label="Valor da mensalidade (R$)"
@@ -183,7 +165,7 @@
               <q-icon name="currency_real" size="16px" color="grey-5" />
             </template>
           </ClFormField>
-          
+
           <ClFormField
             v-model="form.mensalidade_dia_vencimento"
             label="Dia de vencimento"
@@ -196,7 +178,7 @@
               <q-icon name="event" size="16px" color="grey-5" />
             </template>
           </ClFormField>
-          
+
           <div class="mensalidade-config__toggle">
             <div>
               <p class="mensalidade-config__toggle-label">Cliente ativo</p>
@@ -206,10 +188,10 @@
           </div>
         </ClPageCard>
       </form>
-      
+
       <template #footer>
         <div class="dialog-footer">
-          <ClButton variant="ghost" @click="dialog = false">Cancelar</ClButton>
+          <ClButton variant="ghost" @click="dialog = false" label="Cancelar"></ClButton>
           <ClButton
             variant="primary"
             :label="editando ? 'Salvar' : 'Adicionar'"
@@ -222,23 +204,16 @@
     </ClDialog>
 
     <!-- Dialog confirmar exclusão -->
-    <ClDialog
-      v-model="dialogExclusao"
-      title="Excluir cliente"
-    >
+    <ClDialog v-model="dialogExclusao" title="Excluir cliente" show-footer="auto">
       <p class="dialog-message">
-        Tem certeza que deseja excluir <strong>{{ clienteSelecionado?.nome }}</strong>?
+        Tem certeza que deseja excluir <strong>{{ clienteSelecionado?.nome }}</strong
+        >?
       </p>
-      
+
       <template #footer>
         <div class="dialog-footer">
-          <ClButton variant="ghost" @click="dialogExclusao = false">Cancelar</ClButton>
-          <ClButton
-            variant="destructive"
-            label="Excluir"
-            :loading="excluindo"
-            @click="excluir"
-          />
+          <ClButton variant="ghost" @click="dialogExclusao = false" label="Cancelar"></ClButton>
+          <ClButton variant="destructive" label="Excluir" :loading="excluindo" @click="excluir" />
         </div>
       </template>
     </ClDialog>
@@ -250,17 +225,17 @@ import { ref, computed, onMounted } from 'vue';
 import { useClientesStore } from 'src/stores/cliente-store';
 import type { Cliente } from 'src/database/repositories/cliente-repository';
 import { date } from 'quasar';
-import { 
-  ClPageHeader, 
-  ClPageCard, 
-  ClButton, 
-  ClDialog, 
-  ClEmptyState, 
-  ClLoadingState, 
-  ClAvatar, 
-  ClBadge, 
-  ClFormField, 
-  ClFormTextarea 
+import {
+  ClPageHeader,
+  ClPageCard,
+  ClButton,
+  ClDialog,
+  ClEmptyState,
+  ClLoadingState,
+  ClAvatar,
+  ClBadge,
+  ClFormField,
+  ClFormTextarea,
 } from 'src/components/ui';
 
 const store = useClientesStore();
@@ -327,8 +302,12 @@ function abrirDialogEditar(cliente: Cliente) {
     created_at: cliente.created_at ?? '',
     obs: cliente.obs ?? '',
     ativo: cliente.ativo === 1,
-    mensalidade_valor: cliente.mensalidade_config?.valor != null ? String(cliente.mensalidade_config.valor) : '',
-    mensalidade_dia_vencimento: cliente.mensalidade_config?.dia_vencimento != null ? String(cliente.mensalidade_config.dia_vencimento) : '',
+    mensalidade_valor:
+      cliente.mensalidade_config?.valor != null ? String(cliente.mensalidade_config.valor) : '',
+    mensalidade_dia_vencimento:
+      cliente.mensalidade_config?.dia_vencimento != null
+        ? String(cliente.mensalidade_config.dia_vencimento)
+        : '',
   };
   erros.value = { nome: '', mensalidade_valor: '', mensalidade_dia_vencimento: '' };
   dialog.value = true;
@@ -369,8 +348,12 @@ async function salvar() {
     if (form.value.mensalidade_valor !== '' || form.value.mensalidade_dia_vencimento !== '') {
       payload.mensalidade_config = {
         cliente_id: 0,
-        valor: form.value.mensalidade_valor !== '' ? Number(form.value.mensalidade_valor) : undefined,
-        dia_vencimento: form.value.mensalidade_dia_vencimento !== '' ? Number(form.value.mensalidade_dia_vencimento) : undefined,
+        valor:
+          form.value.mensalidade_valor !== '' ? Number(form.value.mensalidade_valor) : undefined,
+        dia_vencimento:
+          form.value.mensalidade_dia_vencimento !== ''
+            ? Number(form.value.mensalidade_dia_vencimento)
+            : undefined,
       };
     }
 
@@ -430,7 +413,7 @@ onMounted(() => void store.carregar());
 .page-content {
   padding: var(--spacing-4) var(--spacing-6);
   padding-bottom: calc(var(--spacing-4) + var(--tab-bar-height) + env(safe-area-inset-bottom));
-  
+
   @media (min-width: #{$breakpoint-md}) {
     padding: var(--spacing-6) var(--spacing-8);
     padding-bottom: calc(var(--spacing-6) + var(--tab-bar-height));
@@ -461,14 +444,16 @@ onMounted(() => void store.carregar());
   border: 1px solid var(--color-surface-border);
   border-radius: var(--border-radius-card);
   box-shadow: var(--shadow-card);
-  transition: box-shadow var(--transition-card), transform var(--transition-card);
-  
+  transition:
+    box-shadow var(--transition-card),
+    transform var(--transition-card);
+
   @media (hover: hover) and (pointer: fine) {
     &:hover {
       box-shadow: var(--shadow-md);
     }
   }
-  
+
   @media (hover: none) and (pointer: coarse) {
     &:active {
       box-shadow: var(--shadow-card-active);
@@ -526,7 +511,7 @@ onMounted(() => void store.carregar());
 
 .btn-delete {
   color: var(--color-negative);
-  
+
   &:hover {
     background: rgba(var(--color-negative-rgb), 0.08);
   }
