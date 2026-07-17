@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@capacitor-community/sqlite": "^8.1.0",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/share": "^8.0.1",
     "@quasar/extras": "^1.16.4",
     "jeep-sqlite": "^2.8.0",
     "pinia": "^3.0.1",
