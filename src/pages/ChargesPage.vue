@@ -229,15 +229,13 @@
     </ClDialog>
 
     <!-- Dialog: Cobranças Extras -->
-    <ClDialog v-model="extraModal" title="Cobranças Extras" :full-mobile="true">
-      <CobrancaExtraModal
-        v-model="extraModal"
-        :cobranca-id="extraCobrancaId"
-        :cliente-nome="extraClienteNome"
-        :competencia="competenciaAtual"
-        @saved="recarregar"
-      />
-    </ClDialog>
+    <CobrancaExtraModal
+      v-model="extraModal"
+      :cobranca-id="extraCobrancaId"
+      :cliente-nome="extraClienteNome"
+      :competencia="competenciaAtual"
+      @saved="recarregar"
+    />
   </q-page>
 </template>
 

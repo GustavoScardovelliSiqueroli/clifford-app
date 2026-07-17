@@ -310,6 +310,7 @@ watch(
       extras.value = [];
     }
   },
+  { immediate: true },
 );
 </script>
 
