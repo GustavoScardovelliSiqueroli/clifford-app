@@ -327,8 +327,6 @@ watch(
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
-  max-height: 70vh;
-  overflow-y: auto;
 }
 
 .dialog-header {
