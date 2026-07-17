@@ -1,4 +1,6 @@
 import { ref } from 'vue';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 
 export interface CobrancaExtraItem {
   motivo: string;
@@ -340,22 +342,25 @@ export function useCompartilharCobranca() {
 
     try {
       const dataUrl = await gerarPngDataUrl(cobranca);
+      const base64 = dataUrl.split(',')[1] ?? dataUrl;
+      const fileName = `cobranca-${cobranca.id}.png`;
 
-      const response = await fetch(dataUrl);
-      const blob = await response.blob();
-      const file = new File([blob], `cobranca-${cobranca.id}.png`, { type: 'image/png' });
+      const saved = await Filesystem.writeFile({
+        path: fileName,
+        data: base64,
+        directory: Directory.Cache,
+      });
 
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: `Cobrança - ${cobranca.nome}`,
-        });
-      } else {
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = `cobranca-${cobranca.id}.png`;
-        link.click();
-      }
+      await Share.share({
+        title: `Cobrança - ${cobranca.nome}`,
+        url: saved.uri,
+        dialogTitle: 'Compartilhar cobrança',
+      });
+
+      Filesystem.deleteFile({
+        path: fileName,
+        directory: Directory.Cache,
+      }).catch(() => {});
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') {
         return;
