@@ -169,7 +169,7 @@
 
     <!-- Dialog: Editar valor + vencimento -->
     <ClDialog v-model="editDialog" title="Editar cobrança" show-footer="auto">
-      <form @submit.prevent="salvarEdicao" class="edit-form">
+      <form id="edit-form" @submit.prevent="salvarEdicao" class="edit-form">
         <ClMoneyField
           v-model="editForm.valor_mensalidade"
           label="Valor da mensalidade"
@@ -194,7 +194,7 @@
 
     <!-- Dialog: Editar data de pagamento -->
     <ClDialog v-model="editDateDialog" title="Editar data de pagamento" show-footer="auto">
-      <form @submit.prevent="salvarDataPagamento" class="edit-form">
+      <form id="edit-date-form" @submit.prevent="salvarDataPagamento" class="edit-form">
         <ClDateField v-model="editDateForm.data_pagamento" label="Data de pagamento" required />
       </form>
       <template #footer>
