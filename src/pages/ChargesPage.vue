@@ -160,6 +160,14 @@
                   aria-label="Editar cobrança"
                   @click="abrirEditar(cobranca)"
                 />
+                <ClButton
+                  variant="ghost"
+                  size="sm"
+                  icon="share"
+                  label="Compartilhar"
+                  :loading="gerando"
+                  @click="handleCompartilhar(cobranca)"
+                />
               </div>
             </div>
           </transition-group>
@@ -257,6 +265,7 @@ import {
   ClLoadingState,
 } from 'src/components/ui';
 import CobrancaExtraModal from 'src/components/CobrancaExtraModal.vue';
+import { useCompartilharCobranca } from 'src/composables/useCompartilharCobranca';
 
 const formatCurrency = (value: number): string => {
   return value.toLocaleString('pt-BR', {
@@ -275,6 +284,8 @@ const formatDate = (dateStr: string): string => {
 
 const cobrancaStore = useCobrancaStore();
 const clienteStore = useClientesStore();
+
+const { compartilhar, gerando } = useCompartilharCobranca();
 
 // Competência
 const competenciaAtual = ref<string>('');
@@ -481,6 +492,22 @@ const recarregar = async () => {
     await cobrancaStore.carregarCobrancas(competenciaAtual.value);
   }
 };
+
+async function handleCompartilhar(c: CobrancaComCliente) {
+  const extras =
+    (c.total_extras ?? 0) > 0 ? await cobrancaStore.carregarExtras(c.id as number) : [];
+  await compartilhar({
+    id: c.id as number,
+    nome: c.nome,
+    telefone: c.telefone,
+    valor_mensalidade: c.valor_mensalidade,
+    total_extras: c.total_extras ?? 0,
+    vencimento: c.vencimento,
+    data_pagamento: c.data_pagamento ?? null,
+    competencia: c.competencia,
+    extras: extras.map((e) => ({ motivo: e.motivo, valor: e.valor })),
+  });
+}
 
 // Init
 onMounted(async () => {
