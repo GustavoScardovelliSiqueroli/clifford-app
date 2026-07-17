@@ -12,82 +12,82 @@ O principal objetivo do sistema é controlar a cobrança das mensalidades dos al
 
 Além da mensalidade, o aplicativo também deve permitir registrar cobranças adicionais, como:
 
-* valor da tela utilizada em um novo quadro;
-* custos extras relacionados ao uso excessivo de tintas;
-* outras cobranças complementares ocasionais.
+- valor da tela utilizada em um novo quadro;
+- custos extras relacionados ao uso excessivo de tintas;
+- outras cobranças complementares ocasionais.
 
 ## Plataforma e Arquitetura
 
 ### Plataforma
 
-* Android
+- Android
 
 ### Arquitetura
 
-* Local-first
-* Offline-first
-* Sem backend
-* Sem APIs externas obrigatórias
-* Todos os dados armazenados localmente no dispositivo
+- Local-first
+- Offline-first
+- Sem backend
+- Sem APIs externas obrigatórias
+- Todos os dados armazenados localmente no dispositivo
 
 ## Stack Tecnológica
 
-* Vue 3
-* Quasar Framework
-* Pinia
-* Capacitor
-* SQLite
+- Vue 3
+- Quasar Framework
+- Pinia
+- Capacitor
+- SQLite
 
 ## Características do Sistema
 
-* Aplicativo mobile simples;
-* Apenas um usuário;
-* Sem login;
-* Sem controle de permissões;
-* Sem múltiplos perfis;
-* Navegação simples e direta;
-* Poucas telas;
-* Fluxos rápidos e intuitivos.
+- Aplicativo mobile simples;
+- Apenas um usuário;
+- Sem login;
+- Sem controle de permissões;
+- Sem múltiplos perfis;
+- Navegação simples e direta;
+- Poucas telas;
+- Fluxos rápidos e intuitivos.
 
 ## Funcionalidades Principais
 
 ### Gestão de alunos
 
-* Cadastro de alunos;
-* Informações básicas de contato;
-* Observações opcionais;
-* Histórico financeiro simples.
+- Cadastro de alunos;
+- Informações básicas de contato;
+- Observações opcionais;
+- Histórico financeiro simples.
 
 ### Controle de mensalidades
 
-* Cadastro do valor da mensalidade;
-* Controle de reajuste anual;
-* Controle de vencimento;
-* Vencimento padrão no quinto dia útil do mês;
-* Registro manual de pagamento;
-* Histórico de pagamentos.
+- Cadastro do valor da mensalidade;
+- Controle de reajuste anual;
+- Controle de vencimento;
+- Vencimento padrão no quinto dia útil do mês;
+- Registro manual de pagamento;
+- Histórico de pagamentos.
 
 ### Cobranças adicionais
 
-* Registro de cobranças extras;
-* Associação da cobrança ao aluno;
-* Descrição e valor da cobrança.
+- Registro de cobranças extras;
+- Associação da cobrança ao aluno;
+- Descrição e valor da cobrança.
 
 ### Gestão financeira
 
-* Visualização de pagamentos pendentes;
-* Visualização de pagamentos realizados;
-* Edição de cobranças anteriores quando necessário.
+- Visualização de pagamentos pendentes;
+- Visualização de pagamentos realizados;
+- Edição de cobranças anteriores quando necessário.
 
 ### Geração de cobrança
 
-* Geração de PDF da cobrança;
-* Compartilhamento do PDF via WhatsApp.
+- Geração de PDF da cobrança;
+- Compartilhamento do PDF via WhatsApp.
 
 ### Backup
 
-* Exportação do banco de dados para arquivo local;
-* Possibilidade futura de restauração/importação do backup.
+- Exportação do banco de dados para arquivo local;
+- Possibilidade futura de restauração/importação do backup.
 
 ## Requisitos Não Funcionais
 
@@ -95,23 +95,23 @@ Além da mensalidade, o aplicativo também deve permitir registrar cobranças ad
 
 O sistema deve ser extremamente simples de utilizar:
 
-* poucos elementos por tela;
-* textos claros;
-* botões grandes;
-* baixo número de cliques;
-* evitar menus complexos;
-* evitar configurações avançadas.
+- poucos elementos por tela;
+- textos claros;
+- botões grandes;
+- baixo número de cliques;
+- evitar menus complexos;
+- evitar configurações avançadas.
 
 ### Performance
 
-* Inicialização rápida;
-* Funcionamento fluido em aparelhos Android intermediários;
-* Operação offline integral.
+- Inicialização rápida;
+- Funcionamento fluido em aparelhos Android intermediários;
+- Operação offline integral.
 
 ### Persistência
 
-* Dados armazenados em SQLite local;
-* Nenhuma dependência de internet para funcionamento.
+- Dados armazenados em SQLite local;
+- Nenhuma dependência de internet para funcionamento.
 
 ## Fluxo Principal Esperado
 
@@ -124,10 +124,10 @@ O sistema deve ser extremamente simples de utilizar:
 
 ## Possíveis Expansões Futuras
 
-* Relatórios financeiros;
-* Controle de materiais;
-* Agenda simples;
-* Estatísticas de pagamentos;
-* Backup automático;
-* Exportação para Excel/PDF;
-* Temas visuais com maior acessibilidade.
+- Relatórios financeiros;
+- Controle de materiais;
+- Agenda simples;
+- Estatísticas de pagamentos;
+- Backup automático;
+- Exportação para Excel/PDF;
+- Temas visuais com maior acessibilidade.

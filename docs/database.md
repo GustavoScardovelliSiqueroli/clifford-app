@@ -1,7 +1,7 @@
-**obs:** 
+**obs:**
 
-* Se houver valor em mensalidade_config, ignorar valor de ajustes para mensalidade do cliente;
-* Se houver dia_vencimento em mensalidade config, ignorar valor de ajustes para gerar a mensalidade desse cliente
+- Se houver valor em mensalidade_config, ignorar valor de ajustes para mensalidade do cliente;
+- Se houver dia_vencimento em mensalidade config, ignorar valor de ajustes para gerar a mensalidade desse cliente
 
 ```mermaid
 erDiagram
