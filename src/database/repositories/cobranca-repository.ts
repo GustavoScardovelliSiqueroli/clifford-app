@@ -17,6 +17,10 @@ export interface CobrancaExtra {
   created_at?: string;
 }
 
+export interface CobrancaComExtras extends Cobranca {
+  total_extras: number;
+}
+
 export interface ClienteCobrancaCandidato {
   id: number;
   nome: string;
@@ -104,6 +108,70 @@ export const CobrancaRepository = {
     const result = await db.query(
       'SELECT * FROM cobrancas_extras WHERE id_cobranca = ? ORDER BY id DESC',
       [idCobranca],
+    );
+    return result.values ?? [];
+  },
+
+  async estornarPagamento(id: number): Promise<void> {
+    const db = await getDB();
+    await db.run('UPDATE cobrancas SET data_pagamento = NULL WHERE id = ?', [id]);
+    await saveDB();
+  },
+
+  async atualizar(id: number, campos: Partial<Cobranca>): Promise<void> {
+    const sets: string[] = [];
+    const valores: unknown[] = [];
+
+    if (campos.valor_mensalidade !== undefined) {
+      sets.push('valor_mensalidade = ?');
+      valores.push(campos.valor_mensalidade);
+    }
+    if (campos.vencimento !== undefined) {
+      sets.push('vencimento = ?');
+      valores.push(campos.vencimento);
+    }
+    if (campos.data_pagamento !== undefined) {
+      sets.push('data_pagamento = ?');
+      valores.push(campos.data_pagamento);
+    }
+
+    if (!sets.length) return;
+
+    const db = await getDB();
+    await db.run(`UPDATE cobrancas SET ${sets.join(', ')} WHERE id = ?`, [...valores, id]);
+    await saveDB();
+  },
+
+  async atualizarExtra(id: number, motivo: string, valor: number): Promise<void> {
+    const db = await getDB();
+    await db.run('UPDATE cobrancas_extras SET motivo = ?, valor = ? WHERE id = ?', [
+      motivo,
+      valor,
+      id,
+    ]);
+    await saveDB();
+  },
+
+  async removerExtra(id: number): Promise<void> {
+    const db = await getDB();
+    await db.run('DELETE FROM cobrancas_extras WHERE id = ?', [id]);
+    await saveDB();
+  },
+
+  async findByCompetenciaComExtras(competencia: string): Promise<CobrancaComExtras[]> {
+    const db = await getDB();
+    const result = await db.query(
+      `
+      SELECT
+        c.*,
+        COALESCE(SUM(ce.valor), 0) AS total_extras
+      FROM cobrancas c
+      LEFT JOIN cobrancas_extras ce ON c.id = ce.id_cobranca
+      WHERE c.competencia = ?
+      GROUP BY c.id
+      ORDER BY c.vencimento
+    `,
+      [competencia],
     );
     return result.values ?? [];
   },
