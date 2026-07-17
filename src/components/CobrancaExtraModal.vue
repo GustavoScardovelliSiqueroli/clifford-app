@@ -1,5 +1,5 @@
 <template>
-  <ClDialog v-model="dialog" title="Cobranças Extras" :full-mobile="true">
+  <ClDialog v-model="dialog" title="Cobranças Extras">
     <div class="dialog-content">
       <div class="dialog-header">
         <div>
@@ -27,14 +27,19 @@
                 required
               />
               <div class="extra-item__edit-actions">
-                <ClButton variant="ghost" size="md" @click="cancelarEdicaoExtra">Cancelar</ClButton>
+                <ClButton
+                  variant="ghost"
+                  size="md"
+                  @click="cancelarEdicaoExtra"
+                  label="Cancelar"
+                ></ClButton>
                 <ClButton
                   variant="primary"
                   size="md"
                   :loading="salvandoEdicao"
                   @click="salvarEdicaoExtra(extra.id as number)"
-                  >Salvar</ClButton
-                >
+                  label="Salvar"
+                ></ClButton>
               </div>
             </div>
           </template>
@@ -123,10 +128,13 @@
         }})?
       </p>
       <template #footer>
-        <ClButton variant="ghost" @click="confirmDeleteDialog = false">Cancelar</ClButton>
-        <ClButton variant="destructive" :loading="deletando" @click="excluirExtra"
-          >Excluir</ClButton
-        >
+        <ClButton variant="ghost" @click="confirmDeleteDialog = false" label="Cancelar"></ClButton>
+        <ClButton
+          variant="destructive"
+          :loading="deletando"
+          @click="excluirExtra"
+          label="Excluir"
+        ></ClButton>
       </template>
     </ClDialog>
   </ClDialog>
