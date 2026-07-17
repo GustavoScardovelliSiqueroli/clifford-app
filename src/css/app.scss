@@ -1925,11 +1925,51 @@ body {
 
 // Notification
 .q-notification {
-  background: var(--notification-bg) !important;
-  color: var(--notification-text-color) !important;
   border-radius: var(--notification-border-radius) !important;
   padding: var(--notification-padding) !important;
+  padding-left: 16px !important;
   box-shadow: var(--notification-shadow) !important;
+  font-weight: var(--font-weight-medium) !important;
+  font-size: var(--font-size-body) !important;
+  min-height: 52px;
+
+  .q-notification__icon {
+    font-size: 24px !important;
+    margin-right: 4px;
+  }
+
+  .q-notification__message {
+    line-height: var(--line-height-normal);
+  }
+
+  .q-notification__actions {
+    .q-btn {
+      font-size: var(--font-size-body-sm) !important;
+      min-height: 32px !important;
+      padding: 0 12px !important;
+      border-radius: 8px !important;
+    }
+  }
+}
+
+.q-notification--positive {
+  background: linear-gradient(135deg, #2ecc71, #21ba45) !important;
+  color: #fff !important;
+}
+
+.q-notification--negative {
+  background: linear-gradient(135deg, #e74c3c, #c10015) !important;
+  color: #fff !important;
+}
+
+.q-notification--warning {
+  background: linear-gradient(135deg, #f39c12, #f2c037) !important;
+  color: #1a1a1a !important;
+}
+
+.q-notification--info {
+  background: linear-gradient(135deg, #3498db, #31ccec) !important;
+  color: #fff !important;
 }
 
 // ============================================================
