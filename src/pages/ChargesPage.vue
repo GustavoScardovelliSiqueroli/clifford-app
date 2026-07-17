@@ -180,7 +180,7 @@
         <ClDateField v-model="editForm.vencimento" label="Vencimento" required />
       </form>
       <template #footer>
-        <ClButton variant="ghost" @click="editDialog = false">Cancelar</ClButton>
+        <ClButton variant="ghost" @click="editDialog = false" label="Cancelar"></ClButton>
         <ClButton
           variant="primary"
           type="submit"
@@ -198,7 +198,7 @@
         <ClDateField v-model="editDateForm.data_pagamento" label="Data de pagamento" required />
       </form>
       <template #footer>
-        <ClButton variant="ghost" @click="editDateDialog = false">Cancelar</ClButton>
+        <ClButton variant="ghost" @click="editDateDialog = false" label="Cancelar"></ClButton>
         <ClButton
           variant="primary"
           type="submit"
@@ -218,10 +218,13 @@
       </p>
       <p class="text-tertiary">A cobrança voltará ao status <strong>Pendente</strong>.</p>
       <template #footer>
-        <ClButton variant="ghost" @click="estornarDialog = false">Cancelar</ClButton>
-        <ClButton variant="destructive" :loading="estornando" @click="confirmarEstornar"
-          >Estornar</ClButton
-        >
+        <ClButton variant="ghost" @click="estornarDialog = false" label="Cancelar"></ClButton>
+        <ClButton
+          variant="destructive"
+          :loading="estornando"
+          @click="confirmarEstornar"
+          label="Estornar"
+        ></ClButton>
       </template>
     </ClDialog>
 
