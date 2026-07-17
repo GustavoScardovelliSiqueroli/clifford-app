@@ -29,3 +29,19 @@ export async function saveDB(): Promise<void> {
     await sqlite.saveToStore(DB_NAME);
   }
 }
+
+export async function closeConnection(): Promise<void> {
+  if (db) {
+    try {
+      await db.close();
+    } catch {
+      // Ignore if already closed
+    }
+    db = null;
+  }
+  try {
+    await sqlite.closeConnection(DB_NAME, false);
+  } catch {
+    // Ignore if already closed
+  }
+}

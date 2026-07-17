@@ -79,6 +79,41 @@
           />
         </div>
 
+        <div class="backup-section">
+          <ClPageCard variant="elevated" class="backup-card">
+            <div class="backup-card__header">
+              <q-icon name="folder" size="24px" color="primary" />
+              <div>
+                <h3 class="backup-card__title">Backup e Restauração</h3>
+                <p class="backup-card__description">
+                  Exporte uma cópia do banco de dados ou restaure a partir de um backup
+                </p>
+              </div>
+            </div>
+
+            <div class="backup-card__actions">
+              <ClButton
+                variant="primary"
+                icon="file_upload"
+                label="Exportar Backup"
+                :loading="exportando"
+                @click="exportarBackup"
+                size="lg"
+                full-width
+              />
+              <ClButton
+                variant="outline"
+                icon="file_download"
+                label="Restaurar Backup"
+                :loading="importando"
+                @click="selecionarArquivo"
+                size="lg"
+                full-width
+              />
+            </div>
+          </ClPageCard>
+        </div>
+
         <div class="danger-zone">
           <ClPageCard variant="borderless" class="danger-card" :padded="false">
             <div class="danger-card__content">
@@ -119,14 +154,44 @@
             </div>
           </template>
         </ClDialog>
+
+        <!-- Confirm Restore Dialog -->
+        <ClDialog v-model="dialogImport" title="Restaurar Backup" show-footer="auto">
+          <p class="dialog-message">
+            <strong>ATENÇÃO:</strong> Todos os dados atuais serão substituídos pelos dados do
+            backup. Esta ação <strong>não pode ser desfeita</strong>.
+          </p>
+          <p class="dialog-message">Deseja continuar?</p>
+
+          <template #footer>
+            <div class="dialog-footer">
+              <ClButton variant="ghost" @click="dialogImport = false" label="Cancelar"></ClButton>
+              <ClButton
+                variant="destructive"
+                label="Restaurar"
+                :loading="importando"
+                @click="onImportarBackup"
+              />
+            </div>
+          </template>
+        </ClDialog>
       </template>
     </div>
+
+    <input
+      ref="fileInputRef"
+      type="file"
+      accept=".json"
+      style="display: none"
+      @change="onArquivoSelecionado"
+    />
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
 import { useConfigStore } from 'src/stores/config-store';
+import { useBackup } from 'src/composables/useBackup';
 import { getDB, saveDB } from 'src/database/connection';
 import { runMigrations } from 'src/database/migrations';
 import {
@@ -140,6 +205,7 @@ import {
 } from 'src/components/ui';
 
 const store = useConfigStore();
+const { exportarBackup, importarBackup, exportando, importando } = useBackup();
 
 const form = ref({
   valor_mensalidade: 0,
@@ -154,6 +220,9 @@ const erros = ref({
 const saving = ref(false);
 const dialogReset = ref(false);
 const resetando = ref(false);
+const dialogImport = ref(false);
+const fileInputRef = ref<HTMLInputElement | null>(null);
+let arquivoConteudo = '';
 
 async function salvar() {
   let valid = true;
@@ -219,8 +288,40 @@ async function resetDb() {
   dialogReset.value = false;
   resetando.value = false;
 
-  // Recarregar a página para refletir as mudanças
   window.location.reload();
+}
+
+function selecionarArquivo() {
+  fileInputRef.value?.click();
+}
+
+function onArquivoSelecionado(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    arquivoConteudo = (e.target?.result as string) || '';
+    dialogImport.value = true;
+  };
+  reader.onerror = () => {
+    console.error('Erro ao ler arquivo');
+  };
+  reader.readAsText(file);
+
+  // Reset input so same file can be selected again
+  input.value = '';
+}
+
+async function onImportarBackup() {
+  if (!arquivoConteudo) return;
+  try {
+    await importarBackup(arquivoConteudo);
+    dialogImport.value = false;
+  } catch (error) {
+    console.error('Erro na importação:', error);
+  }
 }
 </script>
 
@@ -321,6 +422,47 @@ async function resetDb() {
   @media (min-width: #{$breakpoint-md}) {
     width: auto;
     min-width: 280px;
+  }
+}
+
+// Backup Section
+.backup-section {
+  margin: var(--spacing-6) 0;
+}
+
+.backup-card {
+  padding: var(--spacing-6);
+}
+
+.backup-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-5);
+}
+
+.backup-card__title {
+  margin: 0 0 var(--spacing-1);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  line-height: var(--line-height-tight);
+}
+
+.backup-card__description {
+  margin: 0;
+  font-size: var(--font-size-caption-md);
+  color: var(--color-text-tertiary);
+  line-height: var(--line-height-normal);
+}
+
+.backup-card__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+
+  @media (min-width: 600px) {
+    flex-direction: row;
   }
 }
 
