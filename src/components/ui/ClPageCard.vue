@@ -3,11 +3,11 @@
     <header v-if="$slots.header" class="page-card__header">
       <slot name="header"></slot>
     </header>
-    
+
     <div class="page-card__content">
       <slot></slot>
     </div>
-    
+
     <footer v-if="$slots.footer" class="page-card__footer">
       <slot name="footer"></slot>
     </footer>
@@ -15,14 +15,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed } from 'vue';
 
 interface Props {
-  variant?: 'default' | 'borderless' | 'elevated' | 'flat'
-  padded?: boolean
+  variant?: 'default' | 'borderless' | 'elevated' | 'flat';
+  padded?: boolean;
 }
 
-const props = defineProps<Props>()
+const props = defineProps<Props>();
 
 const variantClasses = computed(() => ({
   'page-card--default': props.variant === 'default' || !props.variant,
@@ -30,7 +30,7 @@ const variantClasses = computed(() => ({
   'page-card--elevated': props.variant === 'elevated',
   'page-card--flat': props.variant === 'flat',
   'page-card--padded': props.padded !== false,
-}))
+}));
 </script>
 
 <style scoped lang="scss">
@@ -38,8 +38,10 @@ const variantClasses = computed(() => ({
   background: var(--color-surface-primary);
   border-radius: var(--border-radius-card);
   overflow: hidden;
-  transition: box-shadow var(--transition-card), transform var(--transition-card);
-  
+  transition:
+    box-shadow var(--transition-card),
+    transform var(--transition-card);
+
   &:active {
     box-shadow: var(--shadow-card-active);
     transform: scale(0.99);
@@ -101,17 +103,17 @@ const variantClasses = computed(() => ({
   .page-card--padded > .page-card__footer {
     padding: var(--spacing-6);
   }
-  
+
   .page-card__header {
     padding: var(--spacing-6);
     padding-bottom: 0;
     margin-bottom: var(--spacing-6);
   }
-  
+
   .page-card__content {
     padding: var(--spacing-6);
   }
-  
+
   .page-card__footer {
     padding: var(--spacing-6);
     padding-top: 0;

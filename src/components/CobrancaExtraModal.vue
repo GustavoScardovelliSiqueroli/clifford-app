@@ -1,11 +1,6 @@
 <template>
-  <ClDialog
-    v-model="dialog"
-    title="Cobranças Extras"
-    :full-mobile="true"
-  >
+  <ClDialog v-model="dialog" title="Cobranças Extras" :full-mobile="true">
     <div class="dialog-content">
-      <!-- Header com nome do cliente e competência -->
       <div class="dialog-header">
         <div>
           <h3 class="dialog-title">{{ clienteNome }}</h3>
@@ -13,38 +8,74 @@
         </div>
       </div>
 
-      <!-- Lista de extras existentes -->
       <div class="extras-list" v-if="extras.length > 0">
-        <div
-          v-for="extra in extras"
-          :key="extra.id as number"
-          class="extra-item"
-        >
-          <div class="extra-item__info">
-            <p class="extra-item__motivo">{{ extra.motivo }}</p>
-            <p class="extra-item__date">
-              {{ extra.created_at ? formatDate(extra.created_at) : 'Data não disponível' }}
-            </p>
-          </div>
-          <div class="extra-item__value">
-            {{ formatCurrency(extra.valor) }}
-          </div>
+        <div v-for="extra in extras" :key="extra.id as number" class="extra-item">
+          <template v-if="editandoExtraId === extra.id">
+            <div class="extra-item__edit">
+              <ClFormField
+                v-model="editandoMotivo"
+                label="Motivo"
+                placeholder="Ex: Tela nova"
+                required
+              />
+              <ClMoneyField
+                v-model="editandoValor"
+                label="Valor"
+                placeholder="0,00"
+                :min="0.01"
+                :step="0.01"
+                required
+              />
+              <div class="extra-item__edit-actions">
+                <ClButton variant="ghost" size="md" @click="cancelarEdicaoExtra">Cancelar</ClButton>
+                <ClButton
+                  variant="primary"
+                  size="md"
+                  :loading="salvandoEdicao"
+                  @click="salvarEdicaoExtra(extra.id as number)"
+                  >Salvar</ClButton
+                >
+              </div>
+            </div>
+          </template>
+          <template v-else>
+            <div class="extra-item__info">
+              <p class="extra-item__motivo">{{ extra.motivo }}</p>
+              <p class="extra-item__date">
+                {{ extra.created_at ? formatDate(extra.created_at) : 'Data não disponível' }}
+              </p>
+            </div>
+            <div class="extra-item__value">{{ formatCurrency(extra.valor) }}</div>
+            <div class="extra-item__actions">
+              <ClButton
+                variant="ghost"
+                icon="edit"
+                size="sm"
+                aria-label="Editar extra"
+                @click="iniciarEdicaoExtra(extra)"
+              />
+              <ClButton
+                variant="ghost"
+                icon="delete"
+                size="sm"
+                class="btn-delete"
+                aria-label="Excluir extra"
+                @click="confirmarExclusaoExtra(extra)"
+              />
+            </div>
+          </template>
         </div>
 
-        <!-- Total extras -->
         <div class="extras-total">
           <span class="extras-total__label">Total extras:</span>
           <span class="extras-total__value">{{ formatCurrency(totalExtras) }}</span>
         </div>
       </div>
 
-      <div v-else class="extras-empty">
-        Nenhum extra cadastrado
-      </div>
+      <div v-else class="extras-empty">Nenhum extra cadastrado</div>
 
       <div class="divider" />
 
-      <!-- Formulário novo extra -->
       <form @submit.prevent="salvarExtra" class="extra-form">
         <ClFormField
           v-model="novoExtra.motivo"
@@ -79,6 +110,25 @@
         </div>
       </form>
     </div>
+
+    <ClDialog
+      v-model="confirmDeleteDialog"
+      title="Excluir extra"
+      show-footer="auto"
+      :persistent="true"
+    >
+      <p>
+        Tem certeza que deseja excluir <strong>{{ extraParaExcluir?.motivo }}</strong> ({{
+          extraParaExcluir ? formatCurrency(extraParaExcluir.valor) : ''
+        }})?
+      </p>
+      <template #footer>
+        <ClButton variant="ghost" @click="confirmDeleteDialog = false">Cancelar</ClButton>
+        <ClButton variant="destructive" :loading="deletando" @click="excluirExtra"
+          >Excluir</ClButton
+        >
+      </template>
+    </ClDialog>
   </ClDialog>
 </template>
 
@@ -86,12 +136,7 @@
 import { ref, computed, watch } from 'vue';
 import { useCobrancaStore } from 'src/stores/cobranca-store';
 import type { CobrancaExtra } from 'src/database/repositories/cobranca-repository';
-import {
-  ClDialog,
-  ClFormField,
-  ClMoneyField,
-  ClButton,
-} from 'src/components/ui';
+import { ClDialog, ClFormField, ClMoneyField, ClButton } from 'src/components/ui';
 
 interface Props {
   modelValue: boolean;
@@ -150,6 +195,7 @@ const formatDate = (dateStr: string): string => {
 
 const fechar = () => {
   resetForm();
+  cancelarEdicaoExtra();
   emit('update:modelValue', false);
 };
 
@@ -163,9 +209,14 @@ const carregar = async () => {
 };
 
 const salvarExtra = async () => {
-  if (!novoExtra.value.motivo?.trim() || !novoExtra.value.valor || Number(novoExtra.value.valor) <= 0) {
+  if (
+    !novoExtra.value.motivo?.trim() ||
+    !novoExtra.value.valor ||
+    Number(novoExtra.value.valor) <= 0
+  ) {
     if (!novoExtra.value.motivo?.trim()) erros.value.motivo = 'Motivo é obrigatório';
-    if (!novoExtra.value.valor || Number(novoExtra.value.valor) <= 0) erros.value.valor = 'Valor deve ser maior que zero';
+    if (!novoExtra.value.valor || Number(novoExtra.value.valor) <= 0)
+      erros.value.valor = 'Valor deve ser maior que zero';
     return;
   }
   salvando.value = true;
@@ -185,7 +236,69 @@ const salvarExtra = async () => {
   }
 };
 
-// Carregar ao abrir
+const editandoExtraId = ref<number | null>(null);
+const editandoMotivo = ref('');
+const editandoValor = ref(0);
+const salvandoEdicao = ref(false);
+
+function iniciarEdicaoExtra(extra: CobrancaExtra) {
+  editandoExtraId.value = extra.id as number;
+  editandoMotivo.value = extra.motivo;
+  editandoValor.value = extra.valor;
+}
+
+function cancelarEdicaoExtra() {
+  editandoExtraId.value = null;
+  editandoMotivo.value = '';
+  editandoValor.value = 0;
+}
+
+async function salvarEdicaoExtra(id: number) {
+  if (!editandoMotivo.value.trim() || !editandoValor.value || Number(editandoValor.value) <= 0)
+    return;
+  salvandoEdicao.value = true;
+  try {
+    await store.atualizarExtra(
+      id,
+      props.cobrancaId,
+      editandoMotivo.value.trim(),
+      Number(editandoValor.value),
+    );
+    cancelarEdicaoExtra();
+    await carregar();
+    emit('saved');
+  } catch (e) {
+    console.error('Erro ao editar extra:', e);
+  } finally {
+    salvandoEdicao.value = false;
+  }
+}
+
+const confirmDeleteDialog = ref(false);
+const extraParaExcluir = ref<CobrancaExtra | null>(null);
+const deletando = ref(false);
+
+function confirmarExclusaoExtra(extra: CobrancaExtra) {
+  extraParaExcluir.value = extra;
+  confirmDeleteDialog.value = true;
+}
+
+async function excluirExtra() {
+  if (!extraParaExcluir.value?.id) return;
+  deletando.value = true;
+  try {
+    await store.removerExtra(extraParaExcluir.value.id, props.cobrancaId);
+    confirmDeleteDialog.value = false;
+    extraParaExcluir.value = null;
+    await carregar();
+    emit('saved');
+  } catch (e) {
+    console.error('Erro ao excluir extra:', e);
+  } finally {
+    deletando.value = false;
+  }
+}
+
 watch(
   () => props.modelValue,
   async (open) => {
@@ -193,6 +306,7 @@ watch(
       await carregar();
     } else {
       resetForm();
+      cancelarEdicaoExtra();
       extras.value = [];
     }
   },
@@ -236,9 +350,23 @@ watch(
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--spacing-2);
   padding: var(--spacing-3);
   background: var(--color-bg-secondary);
   border-radius: var(--border-radius-md);
+}
+
+.extra-item__edit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  width: 100%;
+}
+
+.extra-item__edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
 }
 
 .extra-item__info {
@@ -269,7 +397,17 @@ watch(
   font-weight: var(--font-weight-semibold);
   color: var(--color-primary);
   white-space: nowrap;
-  margin-left: var(--spacing-3);
+  flex-shrink: 0;
+}
+
+.extra-item__actions {
+  display: flex;
+  gap: var(--spacing-1);
+  flex-shrink: 0;
+}
+
+.btn-delete {
+  color: var(--color-negative);
 }
 
 .extras-total {

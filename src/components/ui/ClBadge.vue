@@ -5,28 +5,28 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed } from 'vue';
 
-type BadgeVariant = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'outline'
-type BadgeSize = 'sm' | 'md' | 'lg'
+type BadgeVariant = 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'outline';
+type BadgeSize = 'sm' | 'md' | 'lg';
 
 interface Props {
-  variant?: BadgeVariant
-  size?: BadgeSize
-  dot?: boolean
+  variant?: BadgeVariant;
+  size?: BadgeSize;
+  dot?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
   variant: 'primary',
   size: 'md',
   dot: false,
-})
+});
 
 const variantClasses = computed(() => {
-  const classes = ['badge', `badge--${props.variant}`, `badge--${props.size}`]
-  if (props.dot) classes.push('badge--dot')
-  return classes.join(' ')
-})
+  const classes = ['badge', `badge--${props.variant}`, `badge--${props.size}`];
+  if (props.dot) classes.push('badge--dot');
+  return classes.join(' ');
+});
 </script>
 
 <style scoped lang="scss">
@@ -38,19 +38,19 @@ const variantClasses = computed(() => {
   border-radius: var(--border-radius-badge);
   white-space: nowrap;
   line-height: 1;
-  
+
   &--sm {
     height: 20px;
     padding: 0 var(--spacing-2);
     font-size: var(--font-size-caption);
   }
-  
+
   &--md {
     height: 24px;
     padding: 0 var(--spacing-2);
     font-size: var(--font-size-caption-md);
   }
-  
+
   &--lg {
     height: 28px;
     padding: 0 var(--spacing-3);
@@ -61,7 +61,7 @@ const variantClasses = computed(() => {
 .badge--dot {
   padding-left: var(--spacing-2);
   padding-right: var(--spacing-2);
-  
+
   &::before {
     content: '';
     display: inline-block;
@@ -72,9 +72,15 @@ const variantClasses = computed(() => {
     margin-right: var(--spacing-2);
     flex-shrink: 0;
   }
-  
-  &.badge--sm::before { width: 5px; height: 5px; }
-  &.badge--lg::before { width: 8px; height: 8px; }
+
+  &.badge--sm::before {
+    width: 5px;
+    height: 5px;
+  }
+  &.badge--lg::before {
+    width: 8px;
+    height: 8px;
+  }
 }
 
 // Variants

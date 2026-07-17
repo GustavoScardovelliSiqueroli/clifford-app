@@ -30,12 +30,7 @@
         <slot name="prepend" />
       </template>
       <template #append>
-        <q-popup-proxy
-          v-model="popupOpen"
-          cover
-          transition-show="scale"
-          transition-hide="scale"
-        >
+        <q-popup-proxy v-model="popupOpen" cover transition-show="scale" transition-hide="scale">
           <q-date
             v-model="fallbackDate"
             :mask="dateMask"
@@ -46,26 +41,9 @@
             @input="onFallbackDateSelect"
           >
             <div class="row items-center justify-end q-gutter-sm q-pa-md">
-              <q-btn
-                v-close-popup
-                label="Limpar"
-                color="negative"
-                flat
-                @click="clearDate"
-              />
-              <q-btn
-                v-close-popup
-                label="Hoje"
-                color="primary"
-                flat
-                @click="selectToday"
-              />
-              <q-btn
-                v-close-popup
-                label="OK"
-                color="primary"
-                flat
-              />
+              <q-btn v-close-popup label="Limpar" color="negative" flat @click="clearDate" />
+              <q-btn v-close-popup label="Hoje" color="primary" flat @click="selectToday" />
+              <q-btn v-close-popup label="OK" color="primary" flat />
             </div>
           </q-date>
         </q-popup-proxy>
@@ -75,34 +53,34 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
-import { date } from 'quasar'
-import ClFormField from './ClFormField.vue'
-import { QPopupProxy, QDate, QBtn } from 'quasar'
+import { ref, computed, watch, onMounted } from 'vue';
+import { date } from 'quasar';
+import ClFormField from './ClFormField.vue';
+import { QPopupProxy, QDate, QBtn } from 'quasar';
 
 interface Props {
-  modelValue: string // Formato ISO: YYYY-MM-DD
-  label?: string
-  placeholder?: string
-  disabled?: boolean
-  readonly?: boolean
-  required?: boolean
-  error?: string
-  hint?: string
-  clearable?: boolean
-  prepend?: string
-  append?: string
-  min?: string // ISO YYYY-MM-DD
-  max?: string // ISO YYYY-MM-DD
-  showWeekNumbers?: boolean
-  firstDayOfWeek?: 0 | 1 | 6
+  modelValue: string; // Formato ISO: YYYY-MM-DD
+  label?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  readonly?: boolean;
+  required?: boolean;
+  error?: string;
+  hint?: string;
+  clearable?: boolean;
+  prepend?: string;
+  append?: string;
+  min?: string; // ISO YYYY-MM-DD
+  max?: string; // ISO YYYY-MM-DD
+  showWeekNumbers?: boolean;
+  firstDayOfWeek?: 0 | 1 | 6;
 }
 
 interface Emits {
-  'update:modelValue': [value: string]
-  blur: [event: FocusEvent]
-  focus: [event: FocusEvent]
-  clear: []
+  'update:modelValue': [value: string];
+  blur: [event: FocusEvent];
+  focus: [event: FocusEvent];
+  clear: [];
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -112,13 +90,13 @@ const props = withDefaults(defineProps<Props>(), {
   clearable: true,
   showWeekNumbers: false,
   firstDayOfWeek: 0,
-})
+});
 
-const emit = defineEmits<Emits>()
+const emit = defineEmits<Emits>();
 
-const supportsNativeDate = ref(false)
-const popupOpen = ref(false)
-const fallbackDate = ref<string | null>(null)
+const supportsNativeDate = ref(false);
+const popupOpen = ref(false);
+const fallbackDate = ref<string | null>(null);
 
 const nativeFormFieldProps = computed(() => ({
   type: 'date' as const,
@@ -132,7 +110,7 @@ const nativeFormFieldProps = computed(() => ({
   required: props.required,
   prepend: props.prepend,
   append: props.append,
-}))
+}));
 
 const fallbackFormFieldProps = computed(() => ({
   type: 'text' as const,
@@ -147,106 +125,109 @@ const fallbackFormFieldProps = computed(() => ({
   prepend: props.prepend,
   append: props.append,
   clearable: props.clearable && !!props.modelValue,
-}))
+}));
 
-const dateMask = computed(() => 'DD/MM/YYYY')
-const minDate = computed(() => props.min || undefined)
-const maxDate = computed(() => props.max || undefined)
+const dateMask = computed(() => 'DD/MM/YYYY');
+const minDate = computed(() => props.min || undefined);
+const maxDate = computed(() => props.max || undefined);
 
 const nativeValue = computed({
   get: () => props.modelValue || '',
   set: (val: string | number) => {
-    emit('update:modelValue', String(val))
+    emit('update:modelValue', String(val));
   },
-})
+});
 
 const displayValue = computed({
   get: () => {
-    if (!props.modelValue) return ''
-    return formatToDisplay(props.modelValue)
+    if (!props.modelValue) return '';
+    return formatToDisplay(props.modelValue);
   },
   set: (val: string | number) => {
-    const iso = parseDisplayToISO(String(val))
-    emit('update:modelValue', iso || '')
+    const iso = parseDisplayToISO(String(val));
+    emit('update:modelValue', iso || '');
   },
-})
+});
 
-const useNative = computed(() => supportsNativeDate.value && !props.readonly)
+const useNative = computed(() => supportsNativeDate.value && !props.readonly);
 
 function formatToDisplay(iso: string): string {
-  if (!iso) return ''
-  const parts = iso.split('-')
-  if (parts.length !== 3) return iso
-  const [year, month, day] = parts
-  return `${day}/${month}/${year}`
+  if (!iso) return '';
+  const parts = iso.split('-');
+  if (parts.length !== 3) return iso;
+  const [year, month, day] = parts;
+  return `${day}/${month}/${year}`;
 }
 
 function parseDisplayToISO(display: string): string {
-  if (!display) return ''
-  const parts = display.split('/')
-  if (parts.length !== 3) return ''
-  const [day, month, year] = parts
-  if (!day || !month || !year) return ''
-  if (day.length !== 2 || month.length !== 2 || year.length !== 4) return ''
-  return `${year}-${month}-${day}`
+  if (!display) return '';
+  const parts = display.split('/');
+  if (parts.length !== 3) return '';
+  const [day, month, year] = parts;
+  if (!day || !month || !year) return '';
+  if (day.length !== 2 || month.length !== 2 || year.length !== 4) return '';
+  return `${year}-${month}-${day}`;
 }
 
 function onNativeInput(val: string | number) {
-  emit('update:modelValue', String(val))
+  emit('update:modelValue', String(val));
 }
 
 function onFallbackInput(val: string | number) {
-  const iso = parseDisplayToISO(String(val))
-  emit('update:modelValue', iso || '')
+  const iso = parseDisplayToISO(String(val));
+  emit('update:modelValue', iso || '');
 }
 
 function onFallbackDateSelect(val: string) {
-  const iso = parseDisplayToISO(val)
-  emit('update:modelValue', iso || '')
-  fallbackDate.value = val
-  popupOpen.value = false
+  const iso = parseDisplayToISO(val);
+  emit('update:modelValue', iso || '');
+  fallbackDate.value = val;
+  popupOpen.value = false;
 }
 
 function onBlur(event: FocusEvent) {
-  emit('blur', event)
+  emit('blur', event);
 }
 
 function onFocus(event: FocusEvent) {
-  emit('focus', event)
+  emit('focus', event);
 }
 
 function selectToday() {
-  const today = date.formatDate(new Date(), 'YYYY-MM-DD')
-  emit('update:modelValue', today)
-  fallbackDate.value = formatToDisplay(today)
+  const today = date.formatDate(new Date(), 'YYYY-MM-DD');
+  emit('update:modelValue', today);
+  fallbackDate.value = formatToDisplay(today);
 }
 
 function clearDate() {
-  emit('update:modelValue', '')
-  fallbackDate.value = null
-  popupOpen.value = false
-  emit('clear')
+  emit('update:modelValue', '');
+  fallbackDate.value = null;
+  popupOpen.value = false;
+  emit('clear');
 }
 
 // Detectar suporte nativo a <input type="date">
 onMounted(() => {
-  const testInput = document.createElement('input')
-  testInput.setAttribute('type', 'date')
-  const notSupported = testInput.type === 'text'
-  supportsNativeDate.value = !notSupported
-  
-  if (props.modelValue) {
-    fallbackDate.value = formatToDisplay(props.modelValue)
-  }
-})
+  const testInput = document.createElement('input');
+  testInput.setAttribute('type', 'date');
+  const notSupported = testInput.type === 'text';
+  supportsNativeDate.value = !notSupported;
 
-watch(() => props.modelValue, (newVal) => {
-  if (newVal) {
-    fallbackDate.value = formatToDisplay(newVal)
-  } else {
-    fallbackDate.value = null
+  if (props.modelValue) {
+    fallbackDate.value = formatToDisplay(props.modelValue);
   }
-})
+});
+
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    if (newVal) {
+      fallbackDate.value = formatToDisplay(newVal);
+    } else {
+      fallbackDate.value = null;
+    }
+  },
+);
 </script>
 
 <style scoped lang="scss">

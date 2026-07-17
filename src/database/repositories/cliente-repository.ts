@@ -31,9 +31,14 @@ interface ClienteRow {
 }
 
 function mapRowToCliente(row: ClienteRow): Cliente {
-  const config = row.mensalidade_valor != null || row.mensalidade_dia_vencimento != null
-    ? { cliente_id: row.id, valor: row.mensalidade_valor, dia_vencimento: row.mensalidade_dia_vencimento } as MensalidadeConfig
-    : undefined;
+  const config =
+    row.mensalidade_valor != null || row.mensalidade_dia_vencimento != null
+      ? ({
+          cliente_id: row.id,
+          valor: row.mensalidade_valor,
+          dia_vencimento: row.mensalidade_dia_vencimento,
+        } as MensalidadeConfig)
+      : undefined;
   return {
     id: row.id,
     nome: row.nome,
@@ -63,7 +68,8 @@ export const ClienteRepository = {
 
   async findById(id: number): Promise<Cliente | null> {
     const db = await getDB();
-    const result = await db.query(`
+    const result = await db.query(
+      `
       SELECT 
         c.*,
         mc.valor as mensalidade_valor,
@@ -71,7 +77,9 @@ export const ClienteRepository = {
       FROM clientes c
       LEFT JOIN mensalidade_config mc ON c.id = mc.cliente_id
       WHERE c.id = ?
-    `, [id]);
+    `,
+      [id],
+    );
     const row = result.values?.[0] as ClienteRow | undefined;
     if (!row) return null;
     return mapRowToCliente(row);
@@ -93,10 +101,17 @@ export const ClienteRepository = {
     // Get the last inserted ID
     const lastIdResult = await db.query('SELECT last_insert_rowid() as id');
     const clienteId = lastIdResult.values?.[0]?.id ?? 0;
-    if (cliente.mensalidade_config?.valor != null || cliente.mensalidade_config?.dia_vencimento != null) {
+    if (
+      cliente.mensalidade_config?.valor != null ||
+      cliente.mensalidade_config?.dia_vencimento != null
+    ) {
       await db.run(
         'INSERT INTO mensalidade_config (cliente_id, valor, dia_vencimento) VALUES (?, ?, ?)',
-        [clienteId, cliente.mensalidade_config.valor ?? null, cliente.mensalidade_config.dia_vencimento ?? null],
+        [
+          clienteId,
+          cliente.mensalidade_config.valor ?? null,
+          cliente.mensalidade_config.dia_vencimento ?? null,
+        ],
       );
     }
     await saveDB();
@@ -117,16 +132,29 @@ export const ClienteRepository = {
     );
     // Handle mensalidade_config
     if (cliente.mensalidade_config !== undefined) {
-      const existing = await db.query('SELECT id FROM mensalidade_config WHERE cliente_id = ?', [id]);
+      const existing = await db.query('SELECT id FROM mensalidade_config WHERE cliente_id = ?', [
+        id,
+      ]);
       if (existing.values?.length) {
         await db.run(
           'UPDATE mensalidade_config SET valor = ?, dia_vencimento = ? WHERE cliente_id = ?',
-          [cliente.mensalidade_config.valor ?? null, cliente.mensalidade_config.dia_vencimento ?? null, id],
+          [
+            cliente.mensalidade_config.valor ?? null,
+            cliente.mensalidade_config.dia_vencimento ?? null,
+            id,
+          ],
         );
-      } else if (cliente.mensalidade_config.valor != null || cliente.mensalidade_config.dia_vencimento != null) {
+      } else if (
+        cliente.mensalidade_config.valor != null ||
+        cliente.mensalidade_config.dia_vencimento != null
+      ) {
         await db.run(
           'INSERT INTO mensalidade_config (cliente_id, valor, dia_vencimento) VALUES (?, ?, ?)',
-          [id, cliente.mensalidade_config.valor ?? null, cliente.mensalidade_config.dia_vencimento ?? null],
+          [
+            id,
+            cliente.mensalidade_config.valor ?? null,
+            cliente.mensalidade_config.dia_vencimento ?? null,
+          ],
         );
       }
     }

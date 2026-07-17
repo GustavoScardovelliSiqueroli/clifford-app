@@ -14,12 +14,12 @@
 
 <script setup lang="ts">
 interface Props {
-  title: string
-  subtitle?: string
-  large?: boolean
+  title: string;
+  subtitle?: string;
+  large?: boolean;
 }
 
-defineProps<Props>()
+defineProps<Props>();
 </script>
 
 <style scoped lang="scss">
@@ -32,7 +32,7 @@ defineProps<Props>()
   z-index: 100;
   backdrop-filter: blur(8px);
   background: rgba(255, 255, 255, 0.95);
-  
+
   @media (min-width: 1024px) {
     padding: var(--spacing-6) var(--spacing-8);
   }
@@ -41,7 +41,7 @@ defineProps<Props>()
 .page-header--lg {
   padding-top: var(--spacing-6);
   padding-bottom: var(--spacing-6);
-  
+
   @media (min-width: 1024px) {
     padding-top: var(--spacing-8);
     padding-bottom: var(--spacing-8);
@@ -92,7 +92,7 @@ defineProps<Props>()
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .page-header__actions {
     justify-content: flex-end;
   }

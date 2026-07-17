@@ -1,11 +1,5 @@
 <template>
-  <div
-    class="avatar"
-    :class="sizeClasses"
-    :style="imageStyle"
-    role="img"
-    :aria-label="ariaLabel"
-  >
+  <div class="avatar" :class="sizeClasses" :style="imageStyle" role="img" :aria-label="ariaLabel">
     <img
       v-if="src"
       :src="src"
@@ -14,86 +8,89 @@
       @error="onImageError"
       loading="lazy"
     />
-    
+
     <span v-else-if="!hasImageError" class="avatar__text">
       {{ initials }}
     </span>
-    
+
     <q-icon v-else :name="fallbackIcon" :size="iconSize" class="avatar__icon" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref } from 'vue';
 
-type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl'
+type AvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 
 interface Props {
-  src?: string
-  alt?: string
-  name?: string
-  size?: AvatarSize
-  fallbackIcon?: string
-  shape?: 'circle' | 'square' | 'rounded'
+  src?: string;
+  alt?: string;
+  name?: string;
+  size?: AvatarSize;
+  fallbackIcon?: string;
+  shape?: 'circle' | 'square' | 'rounded';
 }
 
 const props = withDefaults(defineProps<Props>(), {
   size: 'md',
   fallbackIcon: 'person',
   shape: 'circle',
-})
+});
 
-const hasImageError = ref(false)
+const hasImageError = ref(false);
 
-const sizeClasses = computed(() => [
-  'avatar',
-  `avatar--${props.size}`,
-  `avatar--${props.shape}`,
-].join(' '))
+const sizeClasses = computed(() =>
+  ['avatar', `avatar--${props.size}`, `avatar--${props.shape}`].join(' '),
+);
 
 const imageStyle = computed(() => ({
   backgroundColor: props.name ? generateColor(props.name) : undefined,
-}))
+}));
 
 const initials = computed(() => {
-  if (!props.name) return '?'
-  
+  if (!props.name) return '?';
+
   return props.name
     .split(' ')
     .filter(Boolean)
     .slice(0, 2)
-    .map(n => n[0]?.toUpperCase() ?? '')
-    .join('')
-})
+    .map((n) => n[0]?.toUpperCase() ?? '')
+    .join('');
+});
 
 const ariaLabel = computed(() => {
-  if (props.alt) return props.alt
-  if (props.name) return `Avatar de ${props.name}`
-  return 'Avatar'
-})
+  if (props.alt) return props.alt;
+  if (props.name) return `Avatar de ${props.name}`;
+  return 'Avatar';
+});
 
 const iconSize = computed(() => {
   switch (props.size) {
-    case 'xs': return '10px'
-    case 'sm': return '14px'
-    case 'lg': return '22px'
-    case 'xl': return '26px'
-    default: return '18px'
+    case 'xs':
+      return '10px';
+    case 'sm':
+      return '14px';
+    case 'lg':
+      return '22px';
+    case 'xl':
+      return '26px';
+    default:
+      return '18px';
   }
-})
+});
 
 function onImageError() {
-  hasImageError.value = true
+  hasImageError.value = true;
 }
 
 function generateColor(str: string): string {
-  let hash = 0
+  let hash = 0;
   for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash)
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
   }
-  
-  const hue = hash % 360
-  return `hsl(${hue}, 60%, 45%)`
+
+  const hue = hash % 360;
+  return `hsl(${hue}, 60%, 45%)`;
 }
 </script>
 

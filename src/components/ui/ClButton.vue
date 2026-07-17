@@ -9,11 +9,11 @@
     <span v-if="loading" class="btn__spinner" aria-hidden="true">
       <q-spinner-dots :size="spinnerSize" color="currentColor" />
     </span>
-    
+
     <span v-else-if="icon && !label" class="btn__icon" aria-hidden="true">
       <q-icon :name="icon" :size="iconSize" />
     </span>
-    
+
     <span v-else class="btn__content">
       <q-icon v-if="icon" :name="icon" :size="iconSize" class="btn__icon" aria-hidden="true" />
       <span v-if="label" class="btn__label">{{ label }}</span>
@@ -22,26 +22,26 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { QIcon, QSpinnerDots } from 'quasar'
+import { computed } from 'vue';
+import { QIcon, QSpinnerDots } from 'quasar';
 
-type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'success'
-type ButtonSize = 'sm' | 'md' | 'lg' | 'xl'
+type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive' | 'success';
+type ButtonSize = 'sm' | 'md' | 'lg' | 'xl';
 
 interface Props {
-  label?: string
-  icon?: string
-  variant?: ButtonVariant
-  size?: ButtonSize
-  disabled?: boolean
-  loading?: boolean
-  fullWidth?: boolean
-  type?: 'button' | 'submit' | 'reset'
-  round?: boolean
+  label?: string;
+  icon?: string;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  disabled?: boolean;
+  loading?: boolean;
+  fullWidth?: boolean;
+  type?: 'button' | 'submit' | 'reset';
+  round?: boolean;
 }
 
 interface Emits {
-  click: [event: MouseEvent]
+  click: [event: MouseEvent];
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -52,41 +52,47 @@ const props = withDefaults(defineProps<Props>(), {
   fullWidth: false,
   type: 'button',
   round: false,
-})
+});
 
-const emit = defineEmits<Emits>()
+const emit = defineEmits<Emits>();
 
 const buttonClasses = computed(() => {
-  const classes = ['btn', `btn--${props.variant}`, `btn--${props.size}`]
-  if (props.fullWidth) classes.push('btn--full')
-  if (props.round) classes.push('btn--round')
-  if (props.loading) classes.push('btn--loading')
-  if (props.disabled) classes.push('btn--disabled')
-  if (props.icon && !props.label) classes.push('btn--icon-only')
-  return classes.join(' ')
-})
+  const classes = ['btn', `btn--${props.variant}`, `btn--${props.size}`];
+  if (props.fullWidth) classes.push('btn--full');
+  if (props.round) classes.push('btn--round');
+  if (props.loading) classes.push('btn--loading');
+  if (props.disabled) classes.push('btn--disabled');
+  if (props.icon && !props.label) classes.push('btn--icon-only');
+  return classes.join(' ');
+});
 
 const spinnerSize = computed(() => {
   switch (props.size) {
-    case 'sm': return '16px'
+    case 'sm':
+      return '16px';
     case 'lg':
-    case 'xl': return '24px'
-    default: return '20px'
+    case 'xl':
+      return '24px';
+    default:
+      return '20px';
   }
-})
+});
 
 const iconSize = computed(() => {
   switch (props.size) {
-    case 'sm': return '18px'
+    case 'sm':
+      return '18px';
     case 'lg':
-    case 'xl': return '22px'
-    default: return '20px'
+    case 'xl':
+      return '22px';
+    default:
+      return '20px';
   }
-})
+});
 
 function handleClick(event: MouseEvent) {
   if (!props.disabled && !props.loading) {
-    emit('click', event)
+    emit('click', event);
   }
 }
 </script>
@@ -107,12 +113,12 @@ function handleClick(event: MouseEvent) {
   text-decoration: none;
   white-space: nowrap;
   position: relative;
-  
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
-  
+
   &:active:not(:disabled) {
     transform: scale(0.98);
   }
@@ -155,17 +161,17 @@ function handleClick(event: MouseEvent) {
   border-radius: var(--border-radius-full) !important;
   padding-left: 44px !important;
   padding-right: 44px !important;
-  
+
   &.btn--sm {
     padding-left: 36px !important;
     padding-right: 36px !important;
   }
-  
+
   &.btn--lg {
     padding-left: 52px !important;
     padding-right: 52px !important;
   }
-  
+
   &.btn--xl {
     padding-left: 60px !important;
     padding-right: 60px !important;
@@ -178,17 +184,17 @@ function handleClick(event: MouseEvent) {
   width: auto !important;
   min-width: 44px;
   border-radius: var(--border-radius-full) !important;
-  
+
   &.btn--sm {
     min-width: 36px;
     padding: 0 var(--spacing-2) !important;
   }
-  
+
   &.btn--lg {
     min-width: 52px;
     padding: 0 var(--spacing-4) !important;
   }
-  
+
   &.btn--xl {
     min-width: 60px;
     padding: 0 var(--spacing-5) !important;
@@ -197,11 +203,11 @@ function handleClick(event: MouseEvent) {
 
 .btn--loading {
   color: transparent !important;
-  
+
   .btn__icon {
     opacity: 0;
   }
-  
+
   .btn__label {
     opacity: 0;
   }
@@ -233,11 +239,11 @@ function handleClick(event: MouseEvent) {
 .btn--primary {
   background: var(--color-primary);
   color: var(--color-primary-contrast);
-  
+
   &:hover:not(:disabled) {
     background: var(--color-primary-hover);
   }
-  
+
   @media (hover: none) and (pointer: coarse) {
     &:active:not(:disabled) {
       background: var(--color-primary);
@@ -249,7 +255,7 @@ function handleClick(event: MouseEvent) {
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
   border: 1px solid var(--color-border-light);
-  
+
   &:hover:not(:disabled) {
     background: var(--color-surface-hover);
     border-color: var(--color-border-medium);
@@ -260,7 +266,7 @@ function handleClick(event: MouseEvent) {
   background: transparent;
   color: var(--color-primary);
   border: 1px solid var(--color-primary);
-  
+
   &:hover:not(:disabled) {
     background: rgba(var(--color-primary), 0.08);
   }
@@ -269,12 +275,12 @@ function handleClick(event: MouseEvent) {
 .btn--ghost {
   background: transparent;
   color: var(--color-text-secondary);
-  
+
   &:hover:not(:disabled) {
     background: var(--color-bg-tertiary);
     color: var(--color-text-primary);
   }
-  
+
   @media (hover: none) and (pointer: coarse) {
     &:active:not(:disabled) {
       background: var(--color-bg-tertiary);
@@ -286,7 +292,7 @@ function handleClick(event: MouseEvent) {
 .btn--destructive {
   background: var(--color-negative);
   color: var(--color-white);
-  
+
   &:hover:not(:disabled) {
     background: #a00012;
   }
@@ -295,7 +301,7 @@ function handleClick(event: MouseEvent) {
 .btn--success {
   background: var(--color-positive);
   color: var(--color-white);
-  
+
   &:hover:not(:disabled) {
     background: #1a9c3b;
   }

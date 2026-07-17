@@ -15,23 +15,20 @@ export const AjusteRepository = {
 
   async create(ajuste: Omit<Ajuste, 'id'>): Promise<void> {
     const db = await getDB();
-    await db.run(
-      'INSERT INTO ajustes (valor_mensalidade, dia_vencimento) VALUES (?, ?)',
-      [ajuste.valor_mensalidade, ajuste.dia_vencimento]
-    );
+    await db.run('INSERT INTO ajustes (valor_mensalidade, dia_vencimento) VALUES (?, ?)', [
+      ajuste.valor_mensalidade,
+      ajuste.dia_vencimento,
+    ]);
     await saveDB();
   },
 
   async update(id: number, ajuste: Partial<Ajuste>): Promise<void> {
     const db = await getDB();
-    await db.run(
-      'UPDATE ajustes SET valor_mensalidade = ?, dia_vencimento = ? WHERE id = ?',
-      [
-        ajuste.valor_mensalidade ?? null,
-        ajuste.dia_vencimento ?? null,
-        id
-      ]
-    );
+    await db.run('UPDATE ajustes SET valor_mensalidade = ?, dia_vencimento = ? WHERE id = ?', [
+      ajuste.valor_mensalidade ?? null,
+      ajuste.dia_vencimento ?? null,
+      id,
+    ]);
     await saveDB();
   },
 
@@ -42,5 +39,5 @@ export const AjusteRepository = {
     } else {
       await this.create(ajuste);
     }
-  }
+  },
 };
