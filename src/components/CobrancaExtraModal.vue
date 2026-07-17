@@ -50,23 +50,25 @@
                 {{ extra.created_at ? formatDate(extra.created_at) : 'Data não disponível' }}
               </p>
             </div>
-            <div class="extra-item__value">{{ formatCurrency(extra.valor) }}</div>
-            <div class="extra-item__actions">
-              <ClButton
-                variant="ghost"
-                icon="edit"
-                size="sm"
-                aria-label="Editar extra"
-                @click="iniciarEdicaoExtra(extra)"
-              />
-              <ClButton
-                variant="ghost"
-                icon="delete"
-                size="sm"
-                class="btn-delete"
-                aria-label="Excluir extra"
-                @click="confirmarExclusaoExtra(extra)"
-              />
+            <div>
+              <span class="extra-item__value">{{ formatCurrency(extra.valor) }}</span>
+              <div class="extra-item__actions">
+                <ClButton
+                  variant="ghost"
+                  icon="edit"
+                  size="sm"
+                  aria-label="Editar extra"
+                  @click="iniciarEdicaoExtra(extra)"
+                />
+                <ClButton
+                  variant="ghost"
+                  icon="delete"
+                  size="sm"
+                  class="btn-delete"
+                  aria-label="Excluir extra"
+                  @click="confirmarExclusaoExtra(extra)"
+                />
+              </div>
             </div>
           </template>
         </div>
@@ -355,6 +357,7 @@ watch(
 
 .extra-item {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-2);
@@ -378,7 +381,7 @@ watch(
 
 .extra-item__info {
   flex: 1;
-  min-width: 0;
+  min-width: 120px;
 }
 
 .extra-item__motivo {
@@ -404,13 +407,11 @@ watch(
   font-weight: var(--font-weight-semibold);
   color: var(--color-primary);
   white-space: nowrap;
-  flex-shrink: 0;
 }
 
 .extra-item__actions {
   display: flex;
   gap: var(--spacing-1);
-  flex-shrink: 0;
 }
 
 .btn-delete {
