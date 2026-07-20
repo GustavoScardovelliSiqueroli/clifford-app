@@ -81,22 +81,22 @@ export const useCobrancaStore = defineStore('cobranca', () => {
     }
   }
 
-  async function baixarCobranca(id: number) {
+  async function baixarCobranca(id: number, competencia?: string) {
     loading.value = true;
     try {
       const hoje = new Date().toISOString().split('T')[0] as string;
       await CobrancaRepository.atualizarStatusPagamento(id, hoje);
-      await carregarCobrancas(competenciaAtual.value);
+      await carregarCobrancas(competencia ?? competenciaAtual.value);
     } finally {
       loading.value = false;
     }
   }
 
-  async function estornarBaixa(id: number) {
+  async function estornarBaixa(id: number, competencia?: string) {
     loading.value = true;
     try {
       await CobrancaRepository.estornarPagamento(id);
-      await carregarCobrancas(competenciaAtual.value);
+      await carregarCobrancas(competencia ?? competenciaAtual.value);
     } finally {
       loading.value = false;
     }
@@ -105,44 +105,45 @@ export const useCobrancaStore = defineStore('cobranca', () => {
   async function atualizarCobranca(
     id: number,
     dados: Partial<Pick<Cobranca, 'valor_mensalidade' | 'vencimento' | 'data_pagamento'>>,
+    competencia?: string,
   ) {
     loading.value = true;
     try {
       await CobrancaRepository.atualizar(id, dados);
-      await carregarCobrancas(competenciaAtual.value);
+      await carregarCobrancas(competencia ?? competenciaAtual.value);
     } finally {
       loading.value = false;
     }
   }
 
-  async function adicionarExtra(idCobranca: number, motivo: string, valor: number) {
+  async function adicionarExtra(idCobranca: number, motivo: string, valor: number, competencia?: string) {
     loading.value = true;
     try {
       await CobrancaRepository.adicionarCobrancaExtra(idCobranca, motivo, valor);
       delete extrasCache.value[idCobranca];
-      await carregarCobrancas(competenciaAtual.value);
+      await carregarCobrancas(competencia ?? competenciaAtual.value);
     } finally {
       loading.value = false;
     }
   }
 
-  async function atualizarExtra(id: number, idCobranca: number, motivo: string, valor: number) {
+  async function atualizarExtra(id: number, idCobranca: number, motivo: string, valor: number, competencia?: string) {
     loading.value = true;
     try {
       await CobrancaRepository.atualizarExtra(id, motivo, valor);
       delete extrasCache.value[idCobranca];
-      await carregarCobrancas(competenciaAtual.value);
+      await carregarCobrancas(competencia ?? competenciaAtual.value);
     } finally {
       loading.value = false;
     }
   }
 
-  async function removerExtra(id: number, idCobranca: number) {
+  async function removerExtra(id: number, idCobranca: number, competencia?: string) {
     loading.value = true;
     try {
       await CobrancaRepository.removerExtra(id);
       delete extrasCache.value[idCobranca];
-      await carregarCobrancas(competenciaAtual.value);
+      await carregarCobrancas(competencia ?? competenciaAtual.value);
     } finally {
       loading.value = false;
     }

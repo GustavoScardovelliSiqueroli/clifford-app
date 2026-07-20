@@ -387,7 +387,7 @@ const pagosTotal = computed(() =>
 
 // Ações
 async function baixarCobranca(id: number) {
-  await cobrancaStore.baixarCobranca(id);
+  await cobrancaStore.baixarCobranca(id, competenciaAtual.value);
 }
 
 // Estornar
@@ -404,7 +404,7 @@ async function confirmarEstornar() {
   if (!estornarCobranca.value?.id) return;
   estornando.value = true;
   try {
-    await cobrancaStore.estornarBaixa(estornarCobranca.value.id);
+    await cobrancaStore.estornarBaixa(estornarCobranca.value.id, competenciaAtual.value);
     estornarDialog.value = false;
     estornarCobranca.value = null;
   } finally {
@@ -438,7 +438,7 @@ async function salvarEdicao() {
     await cobrancaStore.atualizarCobranca(editCobrancaId.value, {
       valor_mensalidade: Number(editForm.value.valor_mensalidade),
       vencimento: editForm.value.vencimento,
-    });
+    }, competenciaAtual.value);
     editDialog.value = false;
   } finally {
     salvando.value = false;
@@ -469,7 +469,7 @@ async function salvarDataPagamento() {
   try {
     await cobrancaStore.atualizarCobranca(editDateCobrancaId.value, {
       data_pagamento: editDateForm.value.data_pagamento || null,
-    });
+    }, competenciaAtual.value);
     editDateDialog.value = false;
   } finally {
     salvandoData.value = false;

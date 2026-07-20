@@ -235,6 +235,7 @@ const salvarExtra = async () => {
       props.cobrancaId,
       novoExtra.value.motivo.trim(),
       Number(novoExtra.value.valor),
+      props.competencia,
     );
     resetForm();
     await carregar();
@@ -273,6 +274,7 @@ async function salvarEdicaoExtra(id: number) {
       props.cobrancaId,
       editandoMotivo.value.trim(),
       Number(editandoValor.value),
+      props.competencia,
     );
     cancelarEdicaoExtra();
     await carregar();
@@ -297,7 +299,7 @@ async function excluirExtra() {
   if (!extraParaExcluir.value?.id) return;
   deletando.value = true;
   try {
-    await store.removerExtra(extraParaExcluir.value.id, props.cobrancaId);
+    await store.removerExtra(extraParaExcluir.value.id, props.cobrancaId, props.competencia);
     confirmDeleteDialog.value = false;
     extraParaExcluir.value = null;
     await carregar();
