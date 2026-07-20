@@ -435,10 +435,14 @@ async function salvarEdicao() {
   if (editCobrancaId.value == null) return;
   salvando.value = true;
   try {
-    await cobrancaStore.atualizarCobranca(editCobrancaId.value, {
-      valor_mensalidade: Number(editForm.value.valor_mensalidade),
-      vencimento: editForm.value.vencimento,
-    }, competenciaAtual.value);
+    await cobrancaStore.atualizarCobranca(
+      editCobrancaId.value,
+      {
+        valor_mensalidade: Number(editForm.value.valor_mensalidade),
+        vencimento: editForm.value.vencimento,
+      },
+      competenciaAtual.value,
+    );
     editDialog.value = false;
   } finally {
     salvando.value = false;
@@ -467,9 +471,13 @@ async function salvarDataPagamento() {
   if (editDateCobrancaId.value == null) return;
   salvandoData.value = true;
   try {
-    await cobrancaStore.atualizarCobranca(editDateCobrancaId.value, {
-      data_pagamento: editDateForm.value.data_pagamento || null,
-    }, competenciaAtual.value);
+    await cobrancaStore.atualizarCobranca(
+      editDateCobrancaId.value,
+      {
+        data_pagamento: editDateForm.value.data_pagamento || null,
+      },
+      competenciaAtual.value,
+    );
     editDateDialog.value = false;
   } finally {
     salvandoData.value = false;

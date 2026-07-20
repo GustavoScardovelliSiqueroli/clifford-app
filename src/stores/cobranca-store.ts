@@ -116,7 +116,12 @@ export const useCobrancaStore = defineStore('cobranca', () => {
     }
   }
 
-  async function adicionarExtra(idCobranca: number, motivo: string, valor: number, competencia?: string) {
+  async function adicionarExtra(
+    idCobranca: number,
+    motivo: string,
+    valor: number,
+    competencia?: string,
+  ) {
     loading.value = true;
     try {
       await CobrancaRepository.adicionarCobrancaExtra(idCobranca, motivo, valor);
@@ -127,7 +132,13 @@ export const useCobrancaStore = defineStore('cobranca', () => {
     }
   }
 
-  async function atualizarExtra(id: number, idCobranca: number, motivo: string, valor: number, competencia?: string) {
+  async function atualizarExtra(
+    id: number,
+    idCobranca: number,
+    motivo: string,
+    valor: number,
+    competencia?: string,
+  ) {
     loading.value = true;
     try {
       await CobrancaRepository.atualizarExtra(id, motivo, valor);
