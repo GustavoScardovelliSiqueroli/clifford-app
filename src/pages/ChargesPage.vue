@@ -45,6 +45,7 @@
             :aria-selected="statusFilter === tab.value"
           />
         </div>
+        <ClButton variant="primary" size="sm" icon="add" label="Nova" @click="abrirNovaCobranca" />
       </div>
 
       <!-- Summary -->
@@ -185,6 +186,38 @@
         </div>
       </template>
     </div>
+
+    <!-- Dialog: Nova Cobrança -->
+    <ClDialog v-model="novaDialog" title="Nova cobrança" show-footer="auto">
+      <form id="nova-form" @submit.prevent="criarNovaCobranca" class="edit-form">
+        <label class="select-label">Cliente</label>
+        <select v-model="novaForm.cliente_id" class="cl-select" required>
+          <option value="" disabled selected>Selecione um cliente</option>
+          <option v-for="c in clientesOrdenados" :key="c.id" :value="c.id">
+            {{ c.nome }}{{ !c.ativo ? ' (Inativo)' : '' }}
+          </option>
+        </select>
+        <ClMoneyField
+          v-model="novaForm.valor_mensalidade"
+          label="Valor"
+          :min="0"
+          :step="0.01"
+          required
+        />
+        <ClDateField v-model="novaForm.vencimento" label="Vencimento" required />
+      </form>
+      <template #footer>
+        <ClButton variant="ghost" @click="novaDialog = false" label="Cancelar"></ClButton>
+        <ClButton
+          variant="primary"
+          type="submit"
+          form="nova-form"
+          :loading="criando"
+          label="Criar"
+          size="lg"
+        />
+      </template>
+    </ClDialog>
 
     <!-- Dialog: Editar valor + vencimento -->
     <ClDialog v-model="editDialog" title="Editar cobrança" show-footer="auto">
@@ -615,6 +648,50 @@ async function salvarDataPagamento() {
   }
 }
 
+// Nova cobrança manual
+const novaDialog = ref(false);
+const criando = ref(false);
+const novaForm = ref({ cliente_id: 0, valor_mensalidade: 0, vencimento: '' });
+
+const clientesOrdenados = computed(() =>
+  [...clienteStore.clientes].sort((a, b) => a.nome.localeCompare(b.nome)),
+);
+
+function abrirNovaCobranca() {
+  novaForm.value = { cliente_id: 0, valor_mensalidade: 0, vencimento: '' };
+  novaDialog.value = true;
+}
+
+async function criarNovaCobranca() {
+  if (!novaForm.value.cliente_id || !novaForm.value.vencimento) return;
+  criando.value = true;
+  try {
+    const competencia = novaForm.value.vencimento.slice(0, 7);
+    await cobrancaStore.criarCobrancaManual({
+      cliente_id: novaForm.value.cliente_id,
+      valor_mensalidade: Number(novaForm.value.valor_mensalidade),
+      vencimento: novaForm.value.vencimento,
+      competencia,
+    });
+    novaDialog.value = false;
+    $q.notify({
+      type: 'positive',
+      message: 'Cobrança criada!',
+      icon: 'check_circle',
+      progress: true,
+    });
+  } catch {
+    $q.notify({
+      type: 'negative',
+      message: 'Erro ao criar cobrança.',
+      icon: 'error',
+      progress: true,
+    });
+  } finally {
+    criando.value = false;
+  }
+}
+
 // Extras
 const extraModal = ref(false);
 const extraCobrancaId = ref(0);
@@ -866,6 +943,35 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-4);
+}
+
+.select-label {
+  font-size: var(--font-size-body-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin-bottom: calc(-1 * var(--spacing-3));
+}
+
+.cl-select {
+  width: 100%;
+  height: var(--input-height-md);
+  padding: 0 var(--spacing-4);
+  font-size: var(--font-size-body);
+  font-family: var(--font-family-base);
+  color: var(--color-text-primary);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-medium);
+  border-radius: var(--border-radius-input);
+  outline: none;
+  appearance: auto;
+
+  &:focus {
+    border-color: var(--color-border-focus);
+  }
+
+  &:invalid {
+    color: var(--color-text-tertiary);
+  }
 }
 
 .text-tertiary {

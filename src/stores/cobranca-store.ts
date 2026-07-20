@@ -129,6 +129,27 @@ export const useCobrancaStore = defineStore('cobranca', () => {
     }
   }
 
+  async function criarCobrancaManual(dados: {
+    cliente_id: number;
+    valor_mensalidade: number;
+    vencimento: string;
+    competencia: string;
+  }): Promise<void> {
+    loading.value = true;
+    try {
+      await CobrancaRepository.criar({
+        cliente_id: dados.cliente_id,
+        valor_mensalidade: dados.valor_mensalidade,
+        vencimento: dados.vencimento,
+        data_pagamento: null,
+        competencia: dados.competencia,
+      });
+      await carregarCobrancas(dados.competencia);
+    } finally {
+      loading.value = false;
+    }
+  }
+
   async function adicionarExtra(
     idCobranca: number,
     motivo: string,
@@ -192,6 +213,7 @@ export const useCobrancaStore = defineStore('cobranca', () => {
     estornarBaixa,
     atualizarCobranca,
     removerCobranca,
+    criarCobrancaManual,
     adicionarExtra,
     atualizarExtra,
     removerExtra,

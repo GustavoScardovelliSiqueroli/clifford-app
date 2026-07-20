@@ -84,6 +84,22 @@ export const CobrancaRepository = {
     await saveDB();
   },
 
+  async criar(dados: Omit<Cobranca, 'id'>): Promise<void> {
+    const db = await getDB();
+    await db.run(
+      `INSERT INTO cobrancas (cliente_id, valor_mensalidade, vencimento, data_pagamento, competencia)
+       VALUES (?, ?, ?, ?, ?)`,
+      [
+        dados.cliente_id,
+        dados.valor_mensalidade,
+        dados.vencimento,
+        dados.data_pagamento ?? null,
+        dados.competencia,
+      ],
+    );
+    await saveDB();
+  },
+
   async atualizarStatusPagamento(id: number, dataPagamento: string | null): Promise<void> {
     const db = await getDB();
     await db.run('UPDATE cobrancas SET data_pagamento = ? WHERE id = ?', [
