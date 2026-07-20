@@ -190,13 +190,23 @@
     <!-- Dialog: Nova Cobrança -->
     <ClDialog v-model="novaDialog" title="Nova cobrança" show-footer="auto">
       <form id="nova-form" @submit.prevent="criarNovaCobranca" class="edit-form">
-        <label class="select-label">Cliente</label>
-        <select v-model="novaForm.cliente_id" class="cl-select" required>
-          <option value="" disabled selected>Selecione um cliente</option>
-          <option v-for="c in clientesOrdenados" :key="c.id" :value="c.id">
-            {{ c.nome }}{{ !c.ativo ? ' (Inativo)' : '' }}
-          </option>
-        </select>
+        <ClFormField
+          :model-value="clienteSelecionadoNome"
+          label="Cliente"
+          placeholder="Selecione um cliente"
+          readonly
+          required
+          :error="novaErroCliente"
+          @click="abrirSeletorCliente"
+          class="cliente-field"
+        >
+          <template #prepend>
+            <q-icon name="person" size="18px" color="grey-5" />
+          </template>
+          <template #append>
+            <q-icon name="arrow_drop_down" size="20px" color="grey-5" />
+          </template>
+        </ClFormField>
         <ClMoneyField
           v-model="novaForm.valor_mensalidade"
           label="Valor"
@@ -216,6 +226,47 @@
           label="Criar"
           size="lg"
         />
+      </template>
+    </ClDialog>
+
+    <!-- Dialog: Selecionar Cliente -->
+    <ClDialog v-model="seletorDialog" title="Selecionar cliente" show-footer="auto">
+      <div class="seletor-content">
+        <ClFormField
+          v-model="seletorBusca"
+          placeholder="Buscar cliente..."
+          type="search"
+          prependIcon="search"
+          class="seletor-search"
+        />
+        <div v-if="clientesFiltrados.length === 0" class="seletor-empty">
+          Nenhum cliente encontrado
+        </div>
+        <div v-else class="seletor-list" role="listbox">
+          <div
+            v-for="c in clientesFiltrados"
+            :key="c.id"
+            class="seletor-item"
+            role="option"
+            :aria-selected="c.id === novaForm.cliente_id"
+            @click="selecionarCliente(c)"
+          >
+            <ClAvatar :name="c.nome" size="sm" shape="circle" />
+            <div class="seletor-item__info">
+              <span class="seletor-item__name">{{ c.nome }}</span>
+              <ClBadge v-if="!c.ativo" variant="secondary" size="sm"> Inativo </ClBadge>
+            </div>
+            <q-icon
+              v-if="c.id === novaForm.cliente_id"
+              name="check_circle"
+              size="20px"
+              color="primary"
+            />
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <ClButton variant="ghost" @click="seletorDialog = false" label="Fechar"></ClButton>
       </template>
     </ClDialog>
 
@@ -651,19 +702,51 @@ async function salvarDataPagamento() {
 // Nova cobrança manual
 const novaDialog = ref(false);
 const criando = ref(false);
+const novaErroCliente = ref('');
 const novaForm = ref({ cliente_id: 0, valor_mensalidade: 0, vencimento: '' });
 
-const clientesOrdenados = computed(() =>
-  [...clienteStore.clientes].sort((a, b) => a.nome.localeCompare(b.nome)),
-);
+const seletorDialog = ref(false);
+const seletorBusca = ref('');
+
+const clientesFiltrados = computed(() => {
+  let lista = [...clienteStore.clientes].sort((a, b) => a.nome.localeCompare(b.nome));
+  const termo = seletorBusca.value.toLowerCase().trim();
+  if (termo) {
+    lista = lista.filter((c) => c.nome.toLowerCase().includes(termo));
+  }
+  return lista;
+});
+
+const clienteSelecionadoNome = computed(() => {
+  if (!novaForm.value.cliente_id) return '';
+  const cli = clienteStore.clientes.find((c) => c.id === novaForm.value.cliente_id);
+  return cli ? cli.nome : '';
+});
+
+function abrirSeletorCliente() {
+  seletorBusca.value = '';
+  seletorDialog.value = true;
+}
+
+function selecionarCliente(c: { id?: number }) {
+  if (!c.id) return;
+  novaForm.value.cliente_id = c.id;
+  novaErroCliente.value = '';
+  seletorDialog.value = false;
+}
 
 function abrirNovaCobranca() {
   novaForm.value = { cliente_id: 0, valor_mensalidade: 0, vencimento: '' };
+  novaErroCliente.value = '';
   novaDialog.value = true;
 }
 
 async function criarNovaCobranca() {
-  if (!novaForm.value.cliente_id || !novaForm.value.vencimento) return;
+  if (!novaForm.value.cliente_id) {
+    novaErroCliente.value = 'Selecione um cliente';
+    return;
+  }
+  if (!novaForm.value.vencimento) return;
   criando.value = true;
   try {
     const competencia = novaForm.value.vencimento.slice(0, 7);
@@ -945,33 +1028,65 @@ onMounted(async () => {
   gap: var(--spacing-4);
 }
 
-.select-label {
-  font-size: var(--font-size-body-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-  margin-bottom: calc(-1 * var(--spacing-3));
+.cliente-field {
+  cursor: pointer;
 }
 
-.cl-select {
-  width: 100%;
-  height: var(--input-height-md);
-  padding: 0 var(--spacing-4);
+.seletor-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  min-height: 200px;
+}
+
+.seletor-search {
+  flex-shrink: 0;
+}
+
+.seletor-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  overflow-y: auto;
+  max-height: 320px;
+}
+
+.seletor-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+
+  &:hover {
+    background: var(--color-bg-tertiary);
+  }
+}
+
+.seletor-item__info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-width: 0;
+}
+
+.seletor-item__name {
   font-size: var(--font-size-body);
-  font-family: var(--font-family-base);
+  font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border-medium);
-  border-radius: var(--border-radius-input);
-  outline: none;
-  appearance: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  &:focus {
-    border-color: var(--color-border-focus);
-  }
-
-  &:invalid {
-    color: var(--color-text-tertiary);
-  }
+.seletor-empty {
+  text-align: center;
+  padding: var(--spacing-8) 0;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-body-sm);
 }
 
 .text-tertiary {
