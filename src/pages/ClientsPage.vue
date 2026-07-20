@@ -125,7 +125,10 @@
 
         <div class="mensalidade-config__header">
           <h4 class="mensalidade-config__title">Configuração de Mensalidade</h4>
-          <p class="mensalidade-config__subtitle">Deixe em branco para usar os valores globais</p>
+          <p class="mensalidade-config__subtitle">
+            Deixe em branco para usar os valores globais. O vencimento será ajustado para o próximo
+            dia útil.
+          </p>
         </div>
 
         <ClMoneyField
@@ -141,7 +144,7 @@
 
         <ClFormField
           v-model="form.mensalidade_dia_vencimento"
-          label="Dia de vencimento"
+          label="Dia útil de vencimento"
           placeholder="Ex: 5"
           type="number"
           :min="1"

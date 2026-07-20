@@ -43,13 +43,15 @@
 
               <div class="config-item__info">
                 <h3 class="config-item__title">Dia de Vencimento</h3>
-                <p class="config-item__description">Dia do mês em que as mensalidades vencem</p>
+                <p class="config-item__description">
+                  Dia útil do mês em que as mensalidades vencem
+                </p>
               </div>
 
               <div class="config-item__control">
                 <ClFormField
                   v-model="form.dia_vencimento"
-                  label="Dia de vencimento"
+                  label="Dia útil de vencimento"
                   placeholder="Ex: 5"
                   type="number"
                   :min="1"

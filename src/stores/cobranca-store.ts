@@ -6,6 +6,7 @@ import {
   type CobrancaComExtras,
   type CobrancaExtra,
 } from '../database/repositories/cobranca-repository';
+import { proximoDiaUtil } from '../utils/business-days';
 
 export const useCobrancaStore = defineStore('cobranca', () => {
   const cobrancasMensais = ref<CobrancaComExtras[]>([]);
@@ -56,9 +57,10 @@ export const useCobrancaStore = defineStore('cobranca', () => {
           console.warn('Data de vencimento inválida gerada, usando hoje', { anoNum, mesNum, dia });
           continue;
         }
-        const year = dateObj.getFullYear();
-        const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const day = String(dateObj.getDate()).padStart(2, '0');
+        const dateUtil = proximoDiaUtil(dateObj);
+        const year = dateUtil.getFullYear();
+        const month = String(dateUtil.getMonth() + 1).padStart(2, '0');
+        const day = String(dateUtil.getDate()).padStart(2, '0');
         const vencimento = `${year}-${month}-${day}`;
 
         novasCobrancas.push({

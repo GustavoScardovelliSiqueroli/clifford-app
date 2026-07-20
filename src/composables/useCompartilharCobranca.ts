@@ -197,7 +197,7 @@ async function gerarPngDataUrl(cobranca: CobrancaParaCompartilhar): Promise<stri
   y = drawInfoLine(ctx, 'Aluno:', cobranca.nome, y);
   y = drawInfoLine(ctx, 'Telefone:', cobranca.telefone || '—', y);
   y = drawInfoLine(ctx, 'Competência:', fmtCompetencia(cobranca.competencia), y);
-  y = drawInfoLine(ctx, 'Vencimento:', fmtDate(cobranca.vencimento), y);
+  y = drawInfoLine(ctx, 'Vencimento:', fmtDate(cobranca.vencimento) + ' (dia útil)', y);
   y += 8;
 
   ctx.strokeStyle = '#e0e0e0';

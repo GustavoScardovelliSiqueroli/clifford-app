@@ -120,7 +120,9 @@
 
               <!-- Due + Status -->
               <div class="charge-card__meta">
-                <span class="charge-card__due">Venc {{ formatDate(cobranca.vencimento) }}</span>
+                <span class="charge-card__due"
+                  >Venc {{ formatDate(cobranca.vencimento) }} (dia útil)</span
+                >
                 <ClBadge v-if="!cobranca.data_pagamento" variant="warning" size="sm"
                   >Pendente</ClBadge
                 >
@@ -185,7 +187,11 @@
           :step="0.01"
           required
         />
-        <ClDateField v-model="editForm.vencimento" label="Vencimento" required />
+        <ClDateField v-model="editForm.vencimento" label="Vencimento (dia útil)" required />
+        <p v-if="vencimentoNaoUtil" class="warning-text">
+          Esta data não é um dia útil. O vencimento será ajustado para o próximo dia útil na geração
+          automática.
+        </p>
       </form>
       <template #footer>
         <ClButton variant="ghost" @click="editDialog = false" label="Cancelar"></ClButton>
@@ -266,6 +272,7 @@ import {
 } from 'src/components/ui';
 import CobrancaExtraModal from 'src/components/CobrancaExtraModal.vue';
 import { useCompartilharCobranca } from 'src/composables/useCompartilharCobranca';
+import { isDiaUtil } from 'src/utils/business-days';
 
 const formatCurrency = (value: number): string => {
   return value.toLocaleString('pt-BR', {
@@ -448,6 +455,12 @@ async function salvarEdicao() {
     salvando.value = false;
   }
 }
+
+const vencimentoNaoUtil = computed(() => {
+  if (!editForm.value.vencimento) return false;
+  const d = new Date(editForm.value.vencimento + 'T12:00:00');
+  return !isNaN(d.getTime()) && !isDiaUtil(d);
+});
 
 // Editar data de pagamento (para cobranças pagas)
 const editDateDialog = ref(false);
@@ -727,6 +740,13 @@ onMounted(async () => {
 .text-tertiary {
   color: var(--color-text-tertiary);
   font-size: var(--font-size-body-sm);
+}
+
+.warning-text {
+  margin: 0;
+  font-size: var(--font-size-caption-md);
+  color: var(--color-primary);
+  line-height: var(--line-height-normal);
 }
 
 .list-enter-active,
