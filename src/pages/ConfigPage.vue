@@ -192,6 +192,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
+import { useQuasar } from 'quasar';
 import { useConfigStore } from 'src/stores/config-store';
 import { useBackup } from 'src/composables/useBackup';
 import { getDB, saveDB } from 'src/database/connection';
@@ -206,6 +207,7 @@ import {
   ClMoneyField,
 } from 'src/components/ui';
 
+const $q = useQuasar();
 const store = useConfigStore();
 const { exportarBackup, importarBackup, exportando, importando } = useBackup();
 
@@ -245,8 +247,20 @@ async function salvar() {
   saving.value = true;
   try {
     await store.salvar(form.value);
+    $q.notify({
+      type: 'positive',
+      message: 'Configurações salvas com sucesso!',
+      icon: 'check_circle',
+      progress: true,
+    });
   } catch (error) {
     console.error(error);
+    $q.notify({
+      type: 'negative',
+      message: 'Erro ao salvar configurações. Tente novamente.',
+      icon: 'error',
+      progress: true,
+    });
   } finally {
     saving.value = false;
   }

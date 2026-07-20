@@ -201,9 +201,9 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useQuasar, date } from 'quasar';
 import { useClientesStore } from 'src/stores/cliente-store';
 import type { Cliente } from 'src/database/repositories/cliente-repository';
-import { date } from 'quasar';
 import {
   ClPageHeader,
   ClButton,
@@ -218,6 +218,7 @@ import {
   ClMoneyField,
 } from 'src/components/ui';
 
+const $q = useQuasar();
 const store = useClientesStore();
 
 // Search
@@ -332,8 +333,20 @@ async function salvar() {
 
     if (editando.value && clienteSelecionado.value?.id) {
       await store.atualizar(clienteSelecionado.value.id, payload);
+      $q.notify({
+        type: 'positive',
+        message: 'Cliente atualizado!',
+        icon: 'check_circle',
+        progress: true,
+      });
     } else {
       await store.adicionar(payload);
+      $q.notify({
+        type: 'positive',
+        message: 'Cliente adicionado!',
+        icon: 'check_circle',
+        progress: true,
+      });
     }
     dialog.value = false;
   } catch (error) {
@@ -347,7 +360,12 @@ async function salvar() {
         return;
       }
     }
-    erros.value.nome = 'Erro ao salvar cliente';
+    $q.notify({
+      type: 'negative',
+      message: 'Erro ao salvar cliente.',
+      icon: 'error',
+      progress: true,
+    });
   } finally {
     salvando.value = false;
   }
@@ -368,6 +386,19 @@ async function excluir() {
   try {
     await store.remover(clienteSelecionado.value.id);
     dialogExclusao.value = false;
+    $q.notify({
+      type: 'positive',
+      message: 'Cliente excluído.',
+      icon: 'check_circle',
+      progress: true,
+    });
+  } catch {
+    $q.notify({
+      type: 'negative',
+      message: 'Erro ao excluir cliente.',
+      icon: 'error',
+      progress: true,
+    });
   } finally {
     excluindo.value = false;
   }
