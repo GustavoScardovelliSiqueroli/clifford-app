@@ -118,6 +118,17 @@ export const useCobrancaStore = defineStore('cobranca', () => {
     }
   }
 
+  async function removerCobranca(id: number, competencia?: string) {
+    loading.value = true;
+    try {
+      await CobrancaRepository.remover(id);
+      delete extrasCache.value[id];
+      await carregarCobrancas(competencia ?? competenciaAtual.value);
+    } finally {
+      loading.value = false;
+    }
+  }
+
   async function adicionarExtra(
     idCobranca: number,
     motivo: string,
@@ -180,6 +191,7 @@ export const useCobrancaStore = defineStore('cobranca', () => {
     baixarCobranca,
     estornarBaixa,
     atualizarCobranca,
+    removerCobranca,
     adicionarExtra,
     atualizarExtra,
     removerExtra,

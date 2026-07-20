@@ -158,6 +158,13 @@ export const CobrancaRepository = {
     await saveDB();
   },
 
+  async remover(id: number): Promise<void> {
+    const db = await getDB();
+    await db.run('DELETE FROM cobrancas_extras WHERE id_cobranca = ?', [id]);
+    await db.run('DELETE FROM cobrancas WHERE id = ?', [id]);
+    await saveDB();
+  },
+
   async findByCompetenciaComExtras(competencia: string): Promise<CobrancaComExtras[]> {
     const db = await getDB();
     const result = await db.query(

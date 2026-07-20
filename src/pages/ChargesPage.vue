@@ -170,6 +170,15 @@
                   :loading="gerando"
                   @click="handleCompartilhar(cobranca)"
                 />
+                <ClButton
+                  v-if="!cobranca.data_pagamento"
+                  variant="ghost"
+                  size="sm"
+                  icon="delete_outline"
+                  class="btn-delete"
+                  aria-label="Excluir cobrança"
+                  @click="abrirExcluirCobranca(cobranca)"
+                />
               </div>
             </div>
           </transition-group>
@@ -250,11 +259,30 @@
       :competencia="competenciaAtual"
       @saved="recarregar"
     />
+
+    <!-- Dialog: Confirmar exclusão -->
+    <ClDialog v-model="excluirDialog" title="Excluir cobrança" show-footer="auto">
+      <p>
+        Tem certeza que deseja excluir a cobrança de <strong>{{ excluirCobranca?.nome }}</strong
+        >?
+      </p>
+      <p class="text-tertiary">Esta ação não pode ser desfeita.</p>
+      <template #footer>
+        <ClButton variant="ghost" @click="excluirDialog = false" label="Cancelar"></ClButton>
+        <ClButton
+          variant="destructive"
+          :loading="excluindo"
+          @click="confirmarExcluirCobranca"
+          label="Excluir"
+        ></ClButton>
+      </template>
+    </ClDialog>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
+import { useQuasar } from 'quasar';
 import { useCobrancaStore } from 'src/stores/cobranca-store';
 import { useClientesStore } from 'src/stores/cliente-store';
 import type { CobrancaComExtras } from 'src/database/repositories/cobranca-repository';
@@ -289,6 +317,7 @@ const formatDate = (dateStr: string): string => {
   return date.toLocaleDateString('pt-BR');
 };
 
+const $q = useQuasar();
 const cobrancaStore = useCobrancaStore();
 const clienteStore = useClientesStore();
 
@@ -394,7 +423,22 @@ const pagosTotal = computed(() =>
 
 // Ações
 async function baixarCobranca(id: number) {
-  await cobrancaStore.baixarCobranca(id, competenciaAtual.value);
+  try {
+    await cobrancaStore.baixarCobranca(id, competenciaAtual.value);
+    $q.notify({
+      type: 'positive',
+      message: 'Cobrança baixada com sucesso!',
+      icon: 'check_circle',
+      progress: true,
+    });
+  } catch {
+    $q.notify({
+      type: 'negative',
+      message: 'Erro ao baixar cobrança.',
+      icon: 'error',
+      progress: true,
+    });
+  }
 }
 
 // Estornar
@@ -414,8 +458,56 @@ async function confirmarEstornar() {
     await cobrancaStore.estornarBaixa(estornarCobranca.value.id, competenciaAtual.value);
     estornarDialog.value = false;
     estornarCobranca.value = null;
+    $q.notify({
+      type: 'positive',
+      message: 'Pagamento estornado com sucesso!',
+      icon: 'undo',
+      progress: true,
+    });
+  } catch {
+    $q.notify({
+      type: 'negative',
+      message: 'Erro ao estornar pagamento.',
+      icon: 'error',
+      progress: true,
+    });
   } finally {
     estornando.value = false;
+  }
+}
+
+// Excluir cobrança
+const excluirDialog = ref(false);
+const excluindo = ref(false);
+const excluirCobranca = ref<CobrancaComCliente | null>(null);
+
+function abrirExcluirCobranca(c: CobrancaComCliente) {
+  excluirCobranca.value = c;
+  excluirDialog.value = true;
+}
+
+async function confirmarExcluirCobranca() {
+  if (!excluirCobranca.value?.id) return;
+  excluindo.value = true;
+  try {
+    await cobrancaStore.removerCobranca(excluirCobranca.value.id, competenciaAtual.value);
+    excluirDialog.value = false;
+    excluirCobranca.value = null;
+    $q.notify({
+      type: 'positive',
+      message: 'Cobrança excluída.',
+      icon: 'check_circle',
+      progress: true,
+    });
+  } catch {
+    $q.notify({
+      type: 'negative',
+      message: 'Erro ao excluir cobrança.',
+      icon: 'error',
+      progress: true,
+    });
+  } finally {
+    excluindo.value = false;
   }
 }
 
@@ -451,6 +543,19 @@ async function salvarEdicao() {
       competenciaAtual.value,
     );
     editDialog.value = false;
+    $q.notify({
+      type: 'positive',
+      message: 'Cobrança atualizada com sucesso!',
+      icon: 'check_circle',
+      progress: true,
+    });
+  } catch {
+    $q.notify({
+      type: 'negative',
+      message: 'Erro ao atualizar cobrança.',
+      icon: 'error',
+      progress: true,
+    });
   } finally {
     salvando.value = false;
   }
@@ -492,6 +597,19 @@ async function salvarDataPagamento() {
       competenciaAtual.value,
     );
     editDateDialog.value = false;
+    $q.notify({
+      type: 'positive',
+      message: 'Data de pagamento atualizada!',
+      icon: 'check_circle',
+      progress: true,
+    });
+  } catch {
+    $q.notify({
+      type: 'negative',
+      message: 'Erro ao atualizar data de pagamento.',
+      icon: 'error',
+      progress: true,
+    });
   } finally {
     salvandoData.value = false;
   }
@@ -517,17 +635,26 @@ const recarregar = async () => {
 async function handleCompartilhar(c: CobrancaComCliente) {
   const extras =
     (c.total_extras ?? 0) > 0 ? await cobrancaStore.carregarExtras(c.id as number) : [];
-  await compartilhar({
-    id: c.id as number,
-    nome: c.nome,
-    telefone: c.telefone,
-    valor_mensalidade: c.valor_mensalidade,
-    total_extras: c.total_extras ?? 0,
-    vencimento: c.vencimento,
-    data_pagamento: c.data_pagamento ?? null,
-    competencia: c.competencia,
-    extras: extras.map((e) => ({ motivo: e.motivo, valor: e.valor })),
-  });
+  try {
+    await compartilhar({
+      id: c.id as number,
+      nome: c.nome,
+      telefone: c.telefone,
+      valor_mensalidade: c.valor_mensalidade,
+      total_extras: c.total_extras ?? 0,
+      vencimento: c.vencimento,
+      data_pagamento: c.data_pagamento ?? null,
+      competencia: c.competencia,
+      extras: extras.map((e) => ({ motivo: e.motivo, valor: e.valor })),
+    });
+  } catch {
+    $q.notify({
+      type: 'negative',
+      message: 'Erro ao compartilhar cobrança.',
+      icon: 'error',
+      progress: true,
+    });
+  }
 }
 
 // Init
@@ -729,6 +856,10 @@ onMounted(async () => {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-2);
+}
+
+.charge-card__actions .btn-delete {
+  color: var(--color-negative);
 }
 
 .edit-form {
