@@ -20,8 +20,9 @@ export interface CobrancaParaCompartilhar {
 }
 
 const LOGO_PATH = '/assets/logo.png';
-const W = 500;
+const W = 440;
 const PAD = 32;
+const LOGO_W = 250;
 
 const FONE_CLIFFORD = '(18) 99792-3799';
 
@@ -107,25 +108,6 @@ function drawText(
   ctx.fillText(text, x, y);
 }
 
-function drawMultiline(
-  ctx: CanvasRenderingContext2D,
-  text: string,
-  x: number,
-  y: number,
-  lineHeight: number,
-  opts?: { color?: string; size?: number; align?: CanvasTextAlign },
-): number {
-  ctx.font = `${opts?.size ?? 14}px Roboto, Helvetica, Arial, sans-serif`;
-  ctx.textAlign = opts?.align ?? 'left';
-  ctx.textBaseline = 'top';
-  ctx.fillStyle = opts?.color ?? '#ffffff';
-  for (const line of text.split('\n')) {
-    ctx.fillText(line, x, y);
-    y += lineHeight;
-  }
-  return y;
-}
-
 async function gerarPngDataUrl(cobranca: CobrancaParaCompartilhar): Promise<string> {
   const logoDataUrl = await carregarLogo();
   let logoImg: HTMLImageElement | null = null;
@@ -140,20 +122,20 @@ async function gerarPngDataUrl(cobranca: CobrancaParaCompartilhar): Promise<stri
   const total = cobranca.valor_mensalidade + cobranca.total_extras;
   const pago = !!cobranca.data_pagamento;
 
-  const cellH = 22;
+  const cellH = 26;
   const accentColor = '#fbac25';
   const labelColor = '#555555';
   const valueColor = '#1a1a1a';
 
-  const logoH = logoImg ? Math.min(160, (160 / logoImg.width) * logoImg.height) : 0;
-  const logoAreaH = logoH > 0 ? logoH + 16 : 0;
+  const logoH = logoImg ? Math.min(LOGO_W, (LOGO_W / logoImg.width) * logoImg.height) : 0;
+  const logoAreaH = logoH > 0 ? logoH + 24 : 0;
 
   const extrasCount = cobranca.extras.length;
   const extrasH = extrasCount > 0 ? extrasCount * cellH + 4 : 0;
 
-  const headerH = PAD + logoAreaH + 40 + 16;
+  const headerH = PAD + logoAreaH + 22 + 18 + 24;
 
-  const bodyH = 8 + 24 + cellH * 4 + 8 + 20 + cellH + extrasH + 20 + 40 + 20 + 32 + 20 + 36;
+  const bodyH = 20 + 28 * 4 + 8 + 16 + cellH + 4 + extrasH + 16 + 40 + (pago ? 48 : 0) + 16 + 20 + 24;
 
   const contentH = headerH + bodyH;
 
@@ -173,31 +155,35 @@ async function gerarPngDataUrl(cobranca: CobrancaParaCompartilhar): Promise<stri
   let y = PAD;
 
   if (logoImg) {
-    const lw = 160;
-    const lh = (160 / logoImg.width) * logoImg.height;
+    const lw = LOGO_W;
+    const lh = (LOGO_W / logoImg.width) * logoImg.height;
     ctx.drawImage(logoImg, (W - lw) / 2, y, lw, lh);
-    y += lh + 16;
+    y += lh + 24;
   }
 
-  y = drawMultiline(
-    ctx,
-    'Curso: Artes Plásticas / Artes Visuais /\nDesenho / Aquarela / Pintura em Tela',
-    W / 2,
-    y,
-    18,
-    { size: 12, color: '#cccccc', align: 'center' },
-  );
-  y += 16;
+  drawText(ctx, 'Artes Plásticas / Artes Visuais', W / 2, y, {
+    size: 15,
+    bold: true,
+    color: '#ffffff',
+    align: 'center',
+  });
+  y += 22;
+  drawText(ctx, 'Cursos: Aquarela / Desenho / Pintura em Tela', W / 2, y, {
+    size: 12,
+    color: '#cccccc',
+    align: 'center',
+  });
+  y += 36;
 
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, y, W, bodyH);
 
-  y += 12;
+  y += 20;
 
   y = drawInfoLine(ctx, 'Aluno:', cobranca.nome, y);
   y = drawInfoLine(ctx, 'Telefone:', cobranca.telefone || '—', y);
   y = drawInfoLine(ctx, 'Competência:', fmtCompetencia(cobranca.competencia), y);
-  y = drawInfoLine(ctx, 'Vencimento:', fmtDate(cobranca.vencimento) + ' (dia útil)', y);
+  y = drawInfoLine(ctx, 'Vencimento:', fmtDate(cobranca.vencimento), y);
   y += 8;
 
   ctx.strokeStyle = '#e0e0e0';
@@ -240,29 +226,27 @@ async function gerarPngDataUrl(cobranca: CobrancaParaCompartilhar): Promise<stri
   ctx.fillText(fmt(total), W - PAD, y);
   y += 40;
 
-  const badgeW = 160;
-  const badgeH = 28;
-  const badgeX = (W - badgeW) / 2;
-  ctx.fillStyle = pago ? '#e8f5e9' : '#fff8e1';
-  roundRect(ctx, badgeX, y, badgeW, badgeH, 14);
-  ctx.fill();
-  drawText(ctx, pago ? `Pago em ${fmtDate(cobranca.data_pagamento!)}` : 'Pendente', W / 2, y + 6, {
-    size: 12,
-    bold: true,
-    color: pago ? '#2e7d32' : '#e65100',
-    align: 'center',
-  });
-  y += badgeH + 20;
+  if (pago) {
+    const badgeW = 160;
+    const badgeH = 28;
+    const badgeX = (W - badgeW) / 2;
+    ctx.fillStyle = '#e8f5e9';
+    roundRect(ctx, badgeX, y, badgeW, badgeH, 14);
+    ctx.fill();
+    drawText(ctx, `Pago em ${fmtDate(cobranca.data_pagamento!)}`, W / 2, y + 6, {
+      size: 13,
+      bold: true,
+      color: '#2e7d32',
+      align: 'center',
+    });
+    y += badgeH + 20;
+  }
 
-  ctx.strokeStyle = '#e0e0e0';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(PAD, y);
-  ctx.lineTo(W - PAD, y);
-  ctx.stroke();
+  ctx.fillStyle = '#f0f0f0';
+  ctx.fillRect(0, y, W, 60);
   y += 16;
 
-  drawText(ctx, 'Clifford Ateliê', W / 2, y, {
+  drawText(ctx, 'Clifford Ateliê • desde 1995', W / 2, y, {
     size: 14,
     bold: true,
     align: 'center',
@@ -291,7 +275,7 @@ function drawInfoLine(
   const lw = ctx.measureText(label).width;
   ctx.fillStyle = '#1a1a1a';
   ctx.fillText(value, PAD + lw + 8, y);
-  return y + 24;
+  return y + 28;
 }
 
 function drawValueLine(
