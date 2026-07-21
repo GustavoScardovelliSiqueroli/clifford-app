@@ -135,7 +135,8 @@ async function gerarPngDataUrl(cobranca: CobrancaParaCompartilhar): Promise<stri
 
   const headerH = PAD + logoAreaH + 22 + 18 + 24;
 
-  const bodyH = 20 + 28 * 4 + 8 + 16 + cellH + 4 + extrasH + 16 + 40 + (pago ? 48 : 0) + 16 + 20 + 24;
+  const bodyH =
+    20 + 28 * 4 + 8 + 16 + cellH + 4 + extrasH + 16 + 40 + (pago ? 48 : 0) + 16 + 20 + 24;
 
   const contentH = headerH + bodyH;
 

@@ -20,7 +20,7 @@ Criar um botão "Compartilhar" em cada cobrança na tela de Cobranças que:
 | Item         | Valor                                  |
 | ------------ | -------------------------------------- |
 | Background   | `#f5f5f5` (body), `#000000` (header)   |
-| Largura      | 440px                       |
+| Largura      | 440px                                  |
 | Altura       | Variável (conteúdo ~900px)             |
 | Formato      | PNG                                    |
 | Cor do texto | `#ffffff` no header, `#1a1a1a` no body |
