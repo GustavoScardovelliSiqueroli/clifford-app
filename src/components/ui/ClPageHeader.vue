@@ -1,8 +1,9 @@
 <template>
-  <header class="page-header" :class="{ 'page-header--lg': large }">
+  <header class="page-header" :class="{ 'page-header--lg': large, 'page-header--has-logo': logo }">
     <div class="page-header__content">
       <div class="page-header__main">
-        <h1 class="page-header__title">{{ title }}</h1>
+        <img v-if="logo" :src="logo" :alt="title" class="page-header__logo" />
+        <h1 v-else class="page-header__title">{{ title }}</h1>
         <p v-if="subtitle" class="page-header__subtitle">{{ subtitle }}</p>
       </div>
       <div class="page-header__actions">
@@ -17,6 +18,7 @@ interface Props {
   title: string;
   subtitle?: string;
   large?: boolean;
+  logo?: string;
 }
 
 defineProps<Props>();
@@ -61,6 +63,45 @@ defineProps<Props>();
 .page-header__main {
   flex: 1;
   min-width: 0;
+}
+
+.page-header--has-logo {
+  background: var(--color-black) !important;
+  border-bottom: none;
+  padding-top: 0;
+  padding-bottom: 0;
+
+  .page-header__content {
+    align-items: stretch;
+    max-width: none;
+  }
+
+  .page-header__main {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+}
+
+.page-header__logo {
+  display: block;
+  height: var(--page-header-height);
+  width: auto;
+  padding: var(--spacing-2) 0;
+  object-fit: contain;
+  margin: 0;
+}
+
+@media (min-width: 1024px) {
+  .page-header--has-logo {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .page-header__logo {
+    height: var(--page-header-height-lg);
+    padding: var(--spacing-3) 0;
+  }
 }
 
 .page-header__title {
