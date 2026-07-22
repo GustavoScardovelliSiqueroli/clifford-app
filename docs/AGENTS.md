@@ -66,14 +66,20 @@ Run after changes: `npm run format` → `npm run lint` → `npx vue-tsc --noEmit
 ## Useful Imports
 
 ```ts
-import { date } from 'quasar'
-import { useClienteStore } from 'src/stores/cliente-store'
-import { useCobrancaStore } from 'src/stores/cobranca-store'
-import { useConfigStore } from 'src/stores/config-store'
-import type { Cliente } from 'src/database/repositories/cliente-repository'
-import type { Cobranca, CobrancaExtra } from 'src/database/repositories/cobranca-repository'
-import { ClButton, ClDialog, ClFormField, ClDateField, ClMoneyField, /* ... */ } from 'src/components/ui'
-import { getDB, saveDB } from 'src/database/connection'
+import { date } from 'quasar';
+import { useClienteStore } from 'src/stores/cliente-store';
+import { useCobrancaStore } from 'src/stores/cobranca-store';
+import { useConfigStore } from 'src/stores/config-store';
+import type { Cliente } from 'src/database/repositories/cliente-repository';
+import type { Cobranca, CobrancaExtra } from 'src/database/repositories/cobranca-repository';
+import {
+  ClButton,
+  ClDialog,
+  ClFormField,
+  ClDateField,
+  ClMoneyField /* ... */,
+} from 'src/components/ui';
+import { getDB, saveDB } from 'src/database/connection';
 ```
 
 ## Adding a New Page
